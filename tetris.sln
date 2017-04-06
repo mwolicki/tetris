@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tetris", "tetris\tetris.csproj", "{E7146732-4137-4BC0-8C3D-EA5BDDE45C67}"
 EndProject
+Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "game", "game\game.fsproj", "{63D6991A-311C-4BD4-A756-8607AE12951A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -13,5 +15,9 @@ Global
 		{E7146732-4137-4BC0-8C3D-EA5BDDE45C67}.Debug|x86.Build.0 = Debug|x86
 		{E7146732-4137-4BC0-8C3D-EA5BDDE45C67}.Release|x86.ActiveCfg = Release|x86
 		{E7146732-4137-4BC0-8C3D-EA5BDDE45C67}.Release|x86.Build.0 = Release|x86
+		{63D6991A-311C-4BD4-A756-8607AE12951A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{63D6991A-311C-4BD4-A756-8607AE12951A}.Debug|x86.Build.0 = Debug|Any CPU
+		{63D6991A-311C-4BD4-A756-8607AE12951A}.Release|x86.ActiveCfg = Release|Any CPU
+		{63D6991A-311C-4BD4-A756-8607AE12951A}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

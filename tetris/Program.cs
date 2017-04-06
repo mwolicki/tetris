@@ -20,11 +20,11 @@ namespace tetris
     static class Program
 #endif
     {
-        private static Game1 game;
+        private static game.GameClass game;
 
         internal static void RunGame ()
         {
-            game = new Game1 ();
+            game = new game.GameClass ();
             game.Run ();
 #if !__IOS__ && !__TVOS__
             game.Dispose ();
