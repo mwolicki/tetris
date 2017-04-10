@@ -17,6 +17,21 @@ module Array2D =
             | _ -> false
         exists' 0 0
 
+    let inline mapi f arr = 
+        let iLength = Array2D.length1 arr
+        let jLength = Array2D.length2 arr
+        Array2D.init iLength jLength (fun i j -> f i j arr.[i,j])
+
+    let inline map f = mapi (fun _ _ x -> f x)
+
+    let inline toSeq arr = 
+        let iLength = Array2D.length1 arr
+        let jLength = Array2D.length2 arr
+        seq { for i = 0 to iLength - 1 do
+              for j = 0 to jLength - 1 do
+                yield struct (i, j, arr.[i,j]) }
+
+
 module Game =
 
     type opt<'a when 'a : (new : unit -> 'a) and 'a : struct and 'a :> ValueType> = Nullable<'a>
@@ -63,7 +78,12 @@ module Game =
     [<Struct>]
     type KeyPressed = { Up : bool; Down : bool; Left : bool; Right : bool }
         with member k.Any () = k.Up || k.Down || k.Left || k.Right
-
+    let (|IsLeftPressed|IsRightPressed|IsUpPressed|IsDownPressed|None|) (kp:KeyPressed) =
+        if kp.Up then IsUpPressed
+        elif kp.Down then IsDownPressed
+        elif kp.Left then IsLeftPressed
+        elif kp.Right then IsRightPressed
+        else None
     let colors = [| Color.Red; Color.Gold; Color.Green; Color.Yellow; Color.Blue; Color.Violet; Color.WhiteSmoke; 
                     Color.Brown; Color.Orange; Color.Aqua; Color.Chocolate |]
 
@@ -71,35 +91,74 @@ module Game =
 
     let initState = { Blocks = Array2D.create BoardSize.width BoardSize.height empty }
 
+    let canApplyKeyboardTransition (keyPressed:KeyPressed) (state:State) =
+        if not <| keyPressed.Any () then true
+        else
+            let isValidMove x y = 
+                match keyPressed with
+                | IsLeftPressed -> x > 0
+                | IsRightPressed -> x < BoardSize.width - 1
+                | IsDownPressed -> y < BoardSize.height - 1 
+                | _ -> true
+            state.Blocks 
+            |> Array2D.toSeq
+            |> Seq.filter (fun struct(_,_,struct(v,_))->v)
+            |> Seq.forall (fun struct (x,y,_) -> isValidMove x y)
+
     let applyKeyboardTransition (keyPressed:KeyPressed) (state:State) =
-        if keyPressed.Any () then
+        if keyPressed.Any () && canApplyKeyboardTransition keyPressed state then
             { state with 
                 Blocks =
                     Array2D.init BoardSize.width BoardSize.height
                         (fun x y ->
-                            let x' = if keyPressed.Left then x + 1 
-                                     elif keyPressed.Right then x - 1 
-                                     else x 
+                            let x' = match keyPressed with
+                                     | IsLeftPressed -> x + 1 
+                                     | IsRightPressed -> x - 1 
+                                     | _ -> x 
                                      |> max 0 |> min (BoardSize.width - 1)
-                            let y' = if keyPressed.Down then y - 1 else y
+                            let y' = match keyPressed with
+                                     | IsDownPressed -> y - 1
+                                     | _ -> y
                                      |> max 0
                             let (struct (v,c)) = state.Blocks.[x',y']
 
                             if v then 
-                                if keyPressed.Left && x = BoardSize.width - 1 then empty
-                                elif keyPressed.Right && x = 0 then empty
-                                elif keyPressed.Down && y = 0 then empty
-                                else (struct (v,c)) 
-                            else empty) }
+                                match keyPressed with
+                                | IsLeftPressed when x = BoardSize.width - 1 -> empty
+                                | IsRightPressed when x = 0 -> empty
+                                | IsDownPressed when y = 0 -> empty
+                                | _ -> struct (v,c) 
+                                
+                            else 
+                                let (struct (v,c)) = state.Blocks.[x,y]
+                                if v then empty
+                                else struct (v,c))  }
         else state
 
+    let canMove (state:State) =
+        let isValidMove x y = 
+            if y = BoardSize.height - 1 then 
+                false
+            else 
+                let (struct(v,c)) = state.Blocks.[x,y+1]
+                v || (not c.HasValue && not v) 
+                
+        state.Blocks 
+        |> Array2D.toSeq
+        |> Seq.filter (fun struct(_,_,struct(v,_))->v)
+        |> Seq.forall (fun struct (x,y,_) -> 
+            isValidMove x y)
+
     let move (state:State) =
-        { state with 
-            Blocks =
-                Array2D.init BoardSize.width BoardSize.height
-                    (fun x y ->
-                        if y = 0 then empty
-                        else state.Blocks.[x,y-1]) }
+        if canMove state then
+            { state with Blocks = state.Blocks |> Array2D.mapi 
+                                                    (fun x y vc ->
+                                                        if y = 0 then empty
+                                                        else
+                                                            let (struct (v, c)) = state.Blocks.[x,y-1]
+                                                            if v then struct (v, c)
+                                                            else vc) }
+        else { state with Blocks = state.Blocks |> Array2D.map (fun struct (_, c)-> struct(false, c)) }
 
 
     let applyTransition (rnd:Random) (state:State) =
@@ -114,6 +173,7 @@ module Game =
                 if v.HasValue then Array2D.set blocks (x+middle-1) y (struct (true, v))) (nextBlock.GetArray color)
         { state with Blocks = blocks}
 
+
     let draw width height state = 
         let rectH = height/BoardSize.height
         let rectW = width/BoardSize.width
@@ -121,7 +181,7 @@ module Game =
                 for j = 0 to Array2D.length2 state.Blocks - 1 do
                     let struct(_, color) = state.Blocks.[i,j]
                     if color.HasValue then
-                        yield struct (Rectangle(i*rectW, j*rectH, rectW, rectH), color.Value) }
+                        yield struct (Rectangle(i*rectW, j*rectH, rectW - rectW / 10 , rectH - rectH / 10), color.Value) }
 
 type GameClass () as game =
     inherit Game()
