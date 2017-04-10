@@ -196,6 +196,9 @@ type GameClass () as game =
         game.Content.RootDirectory <- "Content"
         graphics.PreferredBackBufferWidth <- 750
         graphics.PreferredBackBufferHeight <- 1250
+
+    static member IsKeyDown key =
+        Keyboard.GetState(PlayerIndex.One).IsKeyDown key
     override game.LoadContent () =
         base.LoadContent()
         spriteBatch <- new SpriteBatch(game.GraphicsDevice)
@@ -205,12 +208,11 @@ type GameClass () as game =
 
 
         if time % 100. < 0.1 || time > 500. then
-            let keyboard = Keyboard.GetState PlayerIndex.One
             let keyPressed : Game.KeyPressed = 
-                {   Up = keyboard.IsKeyDown Keys.Up
-                    Down = keyboard.IsKeyDown Keys.Down
-                    Left = keyboard.IsKeyDown Keys.Left
-                    Right = keyboard.IsKeyDown Keys.Right }
+                {   Up = GameClass.IsKeyDown Keys.Up
+                    Down = GameClass.IsKeyDown Keys.Down
+                    Left = GameClass.IsKeyDown Keys.Left
+                    Right = GameClass.IsKeyDown Keys.Right }
             state <- state |> Game.applyKeyboardTransition keyPressed
             
             if time > 500. then
