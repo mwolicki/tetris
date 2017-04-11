@@ -28,6 +28,11 @@ module Array2D =
               for j = 0 to jLength - 1 do
                 yield (i, j, arr.[i,j]) }
 
+    let ofList (l:'a list list) =
+        let x = l.Length
+        let y = l.Item 0 |> List.length
+        Array2D.init y x (fun x y -> (l.Item y).Item x)
+
 module Game =
     type Color = int
     type opt<'a when 'a : (new : unit -> 'a) and 'a : struct and 'a :> ValueType> = Nullable<'a>
@@ -86,13 +91,15 @@ module Game =
     let initState = { Blocks = Array2D.create BoardSize.width BoardSize.height empty }
 
     let canApplyKeyboardTransition (keyPressed:KeyPressed) (state:State) =
+        let width = state.Blocks |> Array2D.length1
+        let height = state.Blocks |> Array2D.length2
         if not <| keyPressed.Any () then true
         else
             let isValidMove x y = 
                 match keyPressed with
-                | IsLeftPressed -> x > 0
-                | IsRightPressed -> x < BoardSize.width - 1
-                | IsDownPressed -> y < BoardSize.height - 1 
+                | IsLeftPressed -> x > 0 && (fst state.Blocks.[x-1,y] || (snd state.Blocks.[x-1,y]).HasValue |> not)
+                | IsRightPressed -> x < width - 1 && (fst state.Blocks.[x+1,y] || (snd state.Blocks.[x+1,y]).HasValue  |> not)
+                | IsDownPressed -> y < height - 1 && (fst state.Blocks.[x,y+1] || (snd state.Blocks.[x,y+1]).HasValue |> not)
                 | _ -> true
             state.Blocks 
             |> Array2D.toSeq
@@ -100,25 +107,27 @@ module Game =
             |> Seq.forall (fun (x,y,_) -> isValidMove x y)
 
     let applyKeyboardTransition (keyPressed:KeyPressed) (state:State) =
+        let width = state.Blocks |> Array2D.length1
+        let height = state.Blocks |> Array2D.length2
         if keyPressed.Any () && canApplyKeyboardTransition keyPressed state then
             { state with 
                 Blocks =
-                    Array2D.init BoardSize.width BoardSize.height
-                        (fun x y ->
+                    state.Blocks |> Array2D.mapi
+                        (fun x y _ ->
                             let x' = match keyPressed with
                                      | IsLeftPressed -> x + 1 
                                      | IsRightPressed -> x - 1 
                                      | _ -> x 
-                                     |> max 0 |> min (BoardSize.width - 1)
+                                     |> max 0 |> min (width - 1)
                             let y' = match keyPressed with
                                      | IsDownPressed -> y - 1
                                      | _ -> y
                                      |> max 0
-                            let ( (v,c)) = state.Blocks.[x',y']
+                            let ((v,c)) = state.Blocks.[x',y']
 
                             if v then 
                                 match keyPressed with
-                                | IsLeftPressed when x = BoardSize.width - 1 -> empty
+                                | IsLeftPressed when x = width - 1 -> empty
                                 | IsRightPressed when x = 0 -> empty
                                 | IsDownPressed when y = 0 -> empty
                                 | _ -> (v,c) 
@@ -130,8 +139,10 @@ module Game =
         else state
 
     let canMove (state:State) =
+        let width = state.Blocks |> Array2D.length1
+        let height = state.Blocks |> Array2D.length2
         let isValidMove x y = 
-            if y = BoardSize.height - 1 then 
+            if y = height - 1 then 
                 false
             else 
                 let ((v,c)) = state.Blocks.[x,y+1]
@@ -146,12 +157,13 @@ module Game =
     let move (state:State) =
         if canMove state then
             { state with Blocks = state.Blocks |> Array2D.mapi 
-                                                    (fun x y vc ->
+                                                    (fun x y (v, c) ->
                                                         if y = 0 then empty
                                                         else
-                                                            let ( (v, c)) = state.Blocks.[x,y-1]
-                                                            if v then  (v, c)
-                                                            else vc) }
+                                                            let (v', c') = state.Blocks.[x,y-1]
+                                                            if v' then v', c'
+                                                            elif v then empty
+                                                            else v, c) }
         else { state with Blocks = state.Blocks |> Array2D.map (fun  (_, c)-> (false, c)) }
 
 
