@@ -74,7 +74,7 @@ module Game =
     type Block = { Color:Color }
 
     [<Struct>]
-    type State = { Blocks : (bool * Color opt) [,] }
+    type State = { Blocks : (bool * Color opt) [,]; Points : int }
 
     [<Struct>]
     type KeyPressed = { Up : bool; Down : bool; Left : bool; Right : bool }
@@ -88,7 +88,27 @@ module Game =
 
     let empty = false, opt()
 
-    let initState = { Blocks = Array2D.create BoardSize.width BoardSize.height empty }
+    let initState = { Blocks = Array2D.create BoardSize.width BoardSize.height empty; Points = 0 }
+
+
+    let score (state:State) : State =
+        let width = state.Blocks |> Array2D.length1
+        let height = state.Blocks |> Array2D.length2
+        let result = Array2D.init width height (fun _ _ -> false, opt ())
+        let mutable moveUp = 0
+        for y = height - 1 downto 0 do
+            let fullRow = 
+                seq { for x = width - 1 downto 0 do
+                        let v, c = state.Blocks.[x,y]
+                        yield (not v) && c.HasValue } |> Seq.forall id
+            if fullRow then moveUp <- moveUp + 1
+            if not fullRow then
+                let y' = y + moveUp
+                printfn "%A" y'
+                if y' >= 0 then
+                    for x = width - 1 downto 0 do
+                        Array2D.set result x y' (state.Blocks.[x, y]) 
+        { state with Blocks = result; Points = state.Points + moveUp }
 
     let canApplyKeyboardTransition (keyPressed:KeyPressed) (state:State) =
         let width = state.Blocks |> Array2D.length1

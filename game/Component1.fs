@@ -50,12 +50,15 @@ type GameClass () as game =
                     Left = GameClass.IsKeyDown Keys.Left
                     Right = GameClass.IsKeyDown Keys.Right }
             state <- state |> Game.applyKeyboardTransition keyPressed
+                           |> Game.score
             
             if time > 500. then
                 time <- 0.
                 state <- state 
                     |> Game.move
                     |> Game.applyTransition rnd
+                    |> Game.score
+                    
         else
             game.SuppressDraw()
 
