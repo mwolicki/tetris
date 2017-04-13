@@ -2,7 +2,8 @@
 open game
 open game.Game
 
-let state x = { Blocks = Array2D.ofList x }
+let state2 x p = { Blocks = Array2D.ofList x; Points = p }
+let state x = state2 x 0
 
 let n = empty
 let a = true, opt 1
@@ -46,30 +47,36 @@ state [ [ n; a; n ]
         [ n; b; n ] 
         [ n; n; n ] ] 
 
-let score (state:State) : State =
-    let width = state.Blocks |> Array2D.length1
-    let height = state.Blocks |> Array2D.length2
-    let result = Array2D.init width height (fun _ _ -> false, opt ())
-    let mutable moveUp = 0
-    for x = width - 1 downto 0 do
-        let fullRow = 
-            seq { for y = height - 1 downto 0 do
-                    let v, c = state.Blocks.[x,y]
-                    yield (not v) && c.HasValue } |> Seq.forall id
-        if fullRow then moveUp <- moveUp + 1
-        else
-            let x' = x + moveUp
-            if x' >= 0 then
-                for y = height - 1 downto 0 do
-                    Array2D.set result x y (state.Blocks.[x', y]) 
-    { state with Blocks = result; Points = state.Points + moveUp }
-            
-
-
 state [ [ n; a; n ]
-        [ n; b; n ] 
-        [ n; n; n ] ] 
-|> score { KeyPressed with Down = true } == state [
-        [ n; a; n ]
-        [ n; b; n ] 
-        [ n; n; n ] ] 
+        [ b; b; b ] 
+        [ b; b; b ] ] 
+|> score == state2 [
+        [ n; n; n ]
+        [ n; n; n ] 
+        [ n; a; n ] ] 2
+
+
+
+state [ [ b; a; n; n ]
+        [ b; a; a; a ] 
+        [ b; a; n; n ]
+        [ b; b; b; b ] ] 
+|> canRotate == Some (2,1,3)
+
+state [ [ b; a; b; n ]
+        [ b; a; a; a ] 
+        [ b; a; n; n ]
+        [ b; b; b; b ] ] 
+|> canRotate == None
+
+
+
+state [ [ b; a; n; n ]
+        [ b; a; a; a ] 
+        [ b; a; n; n ]
+        [ b; b; b; b ] ] 
+|> rotate == state [
+        [ b; n; a; n ]
+        [ b; n; a; n ] 
+        [ b; a; a; a ]
+        [ b; b; b; b ] ] 

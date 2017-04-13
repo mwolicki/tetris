@@ -79,12 +79,12 @@ module Game =
     [<Struct>]
     type KeyPressed = { Up : bool; Down : bool; Left : bool; Right : bool }
         with member k.Any () = k.Up || k.Down || k.Left || k.Right
-    let (|IsLeftPressed|IsRightPressed|IsUpPressed|IsDownPressed|None|) (kp:KeyPressed) =
+    let (|IsLeftPressed|IsRightPressed|IsUpPressed|IsDownPressed|Nothing|) (kp:KeyPressed) =
         if kp.Up then IsUpPressed
         elif kp.Down then IsDownPressed
         elif kp.Left then IsLeftPressed
         elif kp.Right then IsRightPressed
-        else None
+        else Nothing
 
     let empty = false, opt()
 
@@ -126,12 +126,57 @@ module Game =
             |> Seq.filter (fun (_,_,(v,_))->v)
             |> Seq.forall (fun (x,y,_) -> isValidMove x y)
 
+
+
+    let activeBlockSpace (state:State) =
+        let min a b = (match a with None -> b | Some a -> min a b) |> Some
+        let max a b = (match a with None -> b | Some a -> max a b) |> Some
+        state.Blocks 
+        |> Array2D.toSeq
+        |> Seq.filter (fun (_,_, (v,_)) -> v)
+        |> Seq.fold (fun (minX, maxX, minY, maxY) (x, y, _) -> (min minX x), (max maxX x), (min minY y), (max maxY y)) (None, None, None, None)
+        |> function 
+        | Some minX, Some maxX, Some minY, Some maxY -> ((minX, maxX), (minY, maxY)) |> Some
+        | _ -> None
+
+    let canRotate (state:State) =
+        let width = state.Blocks |> Array2D.length1
+        let height = state.Blocks |> Array2D.length2
+        let p = activeBlockSpace state 
+        let (Some ((minX, maxX), (minY, maxY))) = p
+        let distance = max (maxX - minX) (maxY - minY) + 1
+        let centralX = (minX + maxX)/2
+        let centralY = (minY + maxY)/2
+        let (minX', maxX', minY', maxY') = (centralX - distance / 2), (centralX + distance / 2), (centralY - distance / 2), (centralY + distance / 2)
+
+        state.Blocks 
+        |> Array2D.toSeq
+        |> Seq.exists (fun (x,y, (v,c)) -> x >= minX' && x <= maxX' && y >= minY' && y <= maxY' && (not v && c.HasValue))
+        |> function
+        | false when minX >= 0 && minY >= 0 && maxX < width && maxY < height -> Some (centralX, centralY, distance)
+        | _  -> None
+        
+    let rotate (state:State) =
+        match canRotate state with
+        | None -> state
+        | Some (centralX, centralY, distance) ->
+            let (minX, maxX, minY, maxY) = (centralX - distance / 2), (centralX + distance / 2), (centralY - distance / 2), (centralY + distance / 2)
+            
+            let blocks = 
+                state.Blocks 
+                |> Array2D.mapi (fun x y v ->
+                    if x >= minX && x <= maxX && y >= minY && y <= maxY then
+                        let x' = centralX - (y - centralY)
+                        let y' = centralY + (x - centralX)
+                        state.Blocks.[x', y']
+                    else v)
+            { state with Blocks = blocks }
+
     let applyKeyboardTransition (keyPressed:KeyPressed) (state:State) =
         let width = state.Blocks |> Array2D.length1
         let height = state.Blocks |> Array2D.length2
         if keyPressed.Any () && canApplyKeyboardTransition keyPressed state then
-            { state with 
-                Blocks =
+            let blocks =
                     state.Blocks |> Array2D.mapi
                         (fun x y _ ->
                             let x' = match keyPressed with
@@ -155,7 +200,10 @@ module Game =
                             else 
                                 let ( (v,c)) = state.Blocks.[x,y]
                                 if v then empty
-                                else (v,c))  }
+                                else (v,c))
+            let state = { state with Blocks = blocks }
+            if keyPressed.Up then rotate state else state
+
         else state
 
     let canMove (state:State) =

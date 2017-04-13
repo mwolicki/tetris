@@ -42,8 +42,8 @@ type GameClass () as game =
         whiteRectangle.SetData([| Color.White |]);
     override game.Update (gameTime: GameTime) =
 
-
-        if time % 100. < 0.1 || time > 500. then
+        let speed = 500. - float (min (state.Points * 5) 350)
+        if time % 100. < 0.01 || time > speed then
             let keyPressed : Game.KeyPressed = 
                 {   Up = GameClass.IsKeyDown Keys.Up
                     Down = GameClass.IsKeyDown Keys.Down
@@ -52,7 +52,7 @@ type GameClass () as game =
             state <- state |> Game.applyKeyboardTransition keyPressed
                            |> Game.score
             
-            if time > 500. then
+            if time > speed then
                 time <- 0.
                 state <- state 
                     |> Game.move
