@@ -27,6 +27,7 @@ type GameClass () as game =
     let mutable spriteBatch : SpriteBatch = null
     let mutable whiteRectangle : Texture2D = null
     let mutable time = 1000.
+    let mutable time2 = 1000.
     let mutable state = Game.initState
     let rnd = Random()
     do
@@ -45,16 +46,18 @@ type GameClass () as game =
         if GameClass.IsKeyDown Keys.R then
             state <- Game.initState
 
-        let speed = 500. - float (min (state.Points * 10) 350)
-        if time % 100. < 0.01 || time > speed then
-            let keyPressed : Game.KeyPressed = 
-                {   Up = GameClass.IsKeyDown Keys.Up
-                    Down = GameClass.IsKeyDown Keys.Down
-                    Left = GameClass.IsKeyDown Keys.Left
-                    Right = GameClass.IsKeyDown Keys.Right }
-            state <- state |> Game.applyKeyboardTransition keyPressed
-                           |> Game.score
-            
+        let speed = 600. - float (min (state.Points * 10) 350)
+        if time2 > 120. || time > speed then
+            if time2 > 120. then
+                time2 <- 0.
+                let keyPressed : Game.KeyPressed = 
+                    {   Up = GameClass.IsKeyDown Keys.Up
+                        Down = GameClass.IsKeyDown Keys.Down
+                        Left = GameClass.IsKeyDown Keys.Left
+                        Right = GameClass.IsKeyDown Keys.Right }
+                state <- state |> Game.applyKeyboardTransition keyPressed
+                               |> Game.score
+                
             if time > speed then
                 time <- 0.
                 state <- state 
@@ -68,6 +71,7 @@ type GameClass () as game =
             
 
         time <- time + gameTime.ElapsedGameTime.TotalMilliseconds
+        time2 <- time2 + gameTime.ElapsedGameTime.TotalMilliseconds
 
         System.GC.Collect 0        
         base.Update gameTime
