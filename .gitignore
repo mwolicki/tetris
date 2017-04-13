@@ -1,5 +1,6 @@
 # Autosave files
 *~
+node_modules/
 
 # build
 [Oo]bj/
