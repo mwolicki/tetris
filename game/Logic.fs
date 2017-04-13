@@ -3,9 +3,21 @@
 open System 
 
 module Array2D =
-    let inline exists f arr = 
-        let iLength = Array2D.length1 arr
-        let jLength = Array2D.length2 arr
+    type Array2D<'a> = private { 
+        base1 : int
+        base2 : int
+        arr: 'a array array
+    }
+    with 
+        member x.Item 
+            with get(i1, i2) = x.arr.[i1].[i2]
+            and set (i1, i2) (value:'a) = x.arr.[i1].[i2] <- value
+        member x.Length1 = x.base1
+        member x.Length2 = x.base2
+
+    let exists f arr = 
+        let iLength = arr.base1
+        let jLength = arr.base2
         let rec exists' i j =
             match arr.[i,j] |> f with
             | true -> true
@@ -14,28 +26,39 @@ module Array2D =
             | _ -> false
         exists' 0 0
 
-    let inline mapi f arr = 
-        let iLength = Array2D.length1 arr
-        let jLength = Array2D.length2 arr
-        Array2D.init iLength jLength (fun i j -> f i j arr.[i,j])
+    let set (arr:Array2D<_>) a b v = arr.[a,b]<-v
 
-    let inline map f = mapi (fun _ _ x -> f x)
+    let init a b f =
+        { base1 = a 
+          base2 = b
+          arr = [| for i = 0 to a - 1 do
+                        yield [| for j = 0 to b - 1 do
+                                    yield f i j|] |] }
+    let create a b x = init a b (fun _ _ -> x)
+    let mapi f arr =
+        init arr.base1 arr.base2 (fun i j -> f i j arr.[i,j])
 
-    let inline toSeq arr = 
-        let iLength = Array2D.length1 arr
-        let jLength = Array2D.length2 arr
+    let map f = mapi (fun _ _ x -> f x)
+
+    let toSeq arr = 
+        let iLength = arr.base1
+        let jLength = arr.base2
         seq { for i = 0 to iLength - 1 do
               for j = 0 to jLength - 1 do
                 yield (i, j, arr.[i,j]) }
 
+    let iteri f arr =
+        for i = 0 to arr.base1 - 1 do
+              for j = 0 to arr.base2 - 1 do
+                f i j arr.[i,j]
+
     let ofList (l:'a list list) =
         let x = l.Length
         let y = l.Item 0 |> List.length
-        Array2D.init y x (fun x y -> (l.Item y).Item x)
+        init y x (fun x y -> (l.Item y).Item x)
 
 module Game =
     type Color = int
-    type opt<'a when 'a : (new : unit -> 'a) and 'a : struct and 'a :> ValueType> = Nullable<'a>
 
     [<RequireQualifiedAccess>]
     module BoardSize = 
@@ -44,37 +67,11 @@ module Game =
         [<Literal>]
         let height = 15
 
-    type BlockType = L = 0 | T = 1 | Line = 2 | Squere = 3
-
-    [<AutoOpen>]
-    module Extensions =
-        type BlockType with
-            member bt.GetStringRepresentation() =
-                match bt with
-                | BlockType.L -> [| "X"
-                                    "X"
-                                    "XX"|]
-
-                | BlockType.T -> [| " X "
-                                    "XXX"|]
-
-                | BlockType.Line -> [| "XxxX"|]
-
-                | BlockType.Squere -> [|"XX"
-                                        "XX"|]
-                 | _ -> [|"X X"
-                          " X "
-                          "X X"|]
-              
-            member bt.GetArray (c:Color) =
-                let str = bt.GetStringRepresentation()
-                Array2D.init 3 4 (fun x y-> if str.Length > x && str.[x].Length > y && str.[x].[y] <> ' ' then opt c else opt())
-
     [<Struct>]
     type Block = { Color:Color }
 
     [<Struct>]
-    type State = { Blocks : (bool * Color opt) [,]; Points : int }
+    type State = { Blocks : (bool * Color option) Array2D.Array2D; Points : int }
 
     [<Struct>]
     type KeyPressed = { Up : bool; Down : bool; Left : bool; Right : bool }
@@ -86,21 +83,21 @@ module Game =
         elif kp.Right then IsRightPressed
         else Nothing
 
-    let empty = false, opt()
+    let empty = false, None
 
     let initState = { Blocks = Array2D.create BoardSize.width BoardSize.height empty; Points = 0 }
 
 
     let score (state:State) : State =
-        let width = state.Blocks |> Array2D.length1
-        let height = state.Blocks |> Array2D.length2
-        let result = Array2D.init width height (fun _ _ -> false, opt ())
+        let width = state.Blocks.Length1
+        let height = state.Blocks.Length2
+        let result = Array2D.init width height (fun _ _ -> false, None)
         let mutable moveUp = 0
         for y = height - 1 downto 0 do
             let fullRow = 
                 seq { for x = width - 1 downto 0 do
                         let v, c = state.Blocks.[x,y]
-                        yield (not v) && c.HasValue } |> Seq.forall id
+                        yield (not v) && Option.isSome c } |> Seq.forall id
             if fullRow then moveUp <- moveUp + 1
             if not fullRow then
                 let y' = y + moveUp
@@ -111,15 +108,15 @@ module Game =
         { state with Blocks = result; Points = state.Points + moveUp }
 
     let canApplyKeyboardTransition (keyPressed:KeyPressed) (state:State) =
-        let width = state.Blocks |> Array2D.length1
-        let height = state.Blocks |> Array2D.length2
+        let width = state.Blocks.Length1
+        let height = state.Blocks.Length2
         if not <| keyPressed.Any () then true
         else
             let isValidMove x y = 
                 match keyPressed with
-                | IsLeftPressed -> x > 0 && (fst state.Blocks.[x-1,y] || (snd state.Blocks.[x-1,y]).HasValue |> not)
-                | IsRightPressed -> x < width - 1 && (fst state.Blocks.[x+1,y] || (snd state.Blocks.[x+1,y]).HasValue  |> not)
-                | IsDownPressed -> y < height - 1 && (fst state.Blocks.[x,y+1] || (snd state.Blocks.[x,y+1]).HasValue |> not)
+                | IsLeftPressed -> x > 0 && (fst state.Blocks.[x-1,y] || Option.isNone (snd state.Blocks.[x-1,y]))
+                | IsRightPressed -> x < width - 1 && (fst state.Blocks.[x+1,y] || Option.isNone (snd state.Blocks.[x+1,y]))
+                | IsDownPressed -> y < height - 1 && (fst state.Blocks.[x,y+1] || Option.isNone (snd state.Blocks.[x,y+1]))
                 | _ -> true
             state.Blocks 
             |> Array2D.toSeq
@@ -140,8 +137,8 @@ module Game =
         | _ -> None
 
     let canRotate (state:State) =
-        let width = state.Blocks |> Array2D.length1
-        let height = state.Blocks |> Array2D.length2
+        let width = state.Blocks.Length1
+        let height = state.Blocks.Length2
         let p = activeBlockSpace state 
         let (Some ((minX, maxX), (minY, maxY))) = p
         let distance = max (maxX - minX) (maxY - minY) + 1
@@ -151,9 +148,9 @@ module Game =
 
         state.Blocks 
         |> Array2D.toSeq
-        |> Seq.exists (fun (x,y, (v,c)) -> x >= minX' && x <= maxX' && y >= minY' && y <= maxY' && (not v && c.HasValue))
+        |> Seq.exists (fun (x,y, (v,c)) -> x >= minX' && x <= maxX' && y >= minY' && y <= maxY' && (not v && Option.isSome c))
         |> function
-        | false when minX >= 0 && minY >= 0 && maxX < width && maxY < height -> Some (centralX, centralY, distance)
+        | false when minX > 0 && minY > 0 && maxX < width && maxY < height -> Some (centralX, centralY, distance)
         | _  -> None
         
     let rotate (state:State) =
@@ -173,8 +170,8 @@ module Game =
             { state with Blocks = blocks }
 
     let applyKeyboardTransition (keyPressed:KeyPressed) (state:State) =
-        let width = state.Blocks |> Array2D.length1
-        let height = state.Blocks |> Array2D.length2
+        let width = state.Blocks.Length1
+        let height = state.Blocks.Length2
         if keyPressed.Any () && canApplyKeyboardTransition keyPressed state then
             let blocks =
                     state.Blocks |> Array2D.mapi
@@ -203,18 +200,17 @@ module Game =
                                 else (v,c))
             let state = { state with Blocks = blocks }
             if keyPressed.Up then rotate state else state
-
         else state
 
     let canMove (state:State) =
-        let width = state.Blocks |> Array2D.length1
-        let height = state.Blocks |> Array2D.length2
+        let width = state.Blocks.Length1
+        let height = state.Blocks.Length2
         let isValidMove x y = 
             if y = height - 1 then 
                 false
             else 
                 let ((v,c)) = state.Blocks.[x,y+1]
-                v || (not c.HasValue && not v)
+                v || (Option.isNone c && not v)
 
         state.Blocks 
         |> Array2D.toSeq
@@ -234,16 +230,42 @@ module Game =
                                                             else v, c) }
         else { state with Blocks = state.Blocks |> Array2D.map (fun  (_, c)-> (false, c)) }
 
+    let blocks : string array array = 
+                  [| [| "X"
+                        "X"
+                        "XX"|];
+
+                     [| "XX"
+                        "X"
+                        "X"|];
+
+
+                    [|  " X ";
+                        "XXX"|];
+
+                    [| "XXXX"|];
+
+                    [|"XX"
+                      "XX"|];
+                      
+                    [|"XX "
+                      "XXX" |] |]
+              
+    let getRandomBlock (rnd:Random) =
+            let str = blocks.[rnd.Next blocks.Length]
+            let c = rnd.Next 255
+            Array2D.init 3 4 (fun x y-> if str.Length > x && str.[x].Length > y && str.[x].[y] <> ' ' then Some c else None)
+
 
     let applyTransition (rnd:Random) (state:State) =
         let blocks = state.Blocks
 
         if blocks |> Array2D.exists (fun ( (x,_))-> x) |> not then
-            let nextBlock = enum<BlockType> (rnd.Next() % 4)
-            let middle = (blocks |> Array2D.length1) / 2
+            let nextBlock = getRandomBlock rnd
+            let middle = (blocks.Length1) / 2
             let color = rnd.Next 255
 
-            Array2D.iteri (fun x y (v:Color opt) -> 
-                if v.HasValue then Array2D.set blocks (x+middle-1) y ( (true, v))) (nextBlock.GetArray color)
+            Array2D.iteri (fun x y (v:Color option) -> 
+                if Option.isSome v then Array2D.set blocks (x+middle-1) y (true, v)) nextBlock
         { state with Blocks = blocks}
 

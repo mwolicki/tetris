@@ -11,8 +11,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "fable-core": "^1.0.0-narumi-905",
-    "babel-runtime": "^6.23.0"
+    "babel-runtime": "^6.23.0",
+    "fable-core": "^1.0.0-narumi-905"
   },
   "devDependencies": {
     "babel-core": "^6.24.0",

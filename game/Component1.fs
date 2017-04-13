@@ -14,10 +14,10 @@ module GameDraw =
     let draw width height state = 
          let rectH = height/BoardSize.height
          let rectW = width/BoardSize.width
-         seq { for i = 0 to Array2D.length1 state.Blocks - 1 do
-                 for j = 0 to Array2D.length2 state.Blocks - 1 do
+         seq { for i = 0 to state.Blocks.Length1 - 1 do
+                 for j = 0 to state.Blocks.Length2 - 1 do
                      let (_, color) = state.Blocks.[i,j]
-                     if color.HasValue then
+                     if Option.isSome color then
                          yield  (Rectangle(i*rectW, j*rectH, rectW - rectW / 10 , rectH - rectH / 10), colors.[color.Value % colors.Length]) }
 
 
@@ -42,7 +42,10 @@ type GameClass () as game =
         whiteRectangle.SetData([| Color.White |]);
     override game.Update (gameTime: GameTime) =
 
-        let speed = 500. - float (min (state.Points * 5) 350)
+        if GameClass.IsKeyDown Keys.R then
+            state <- Game.initState
+
+        let speed = 500. - float (min (state.Points * 10) 350)
         if time % 100. < 0.01 || time > speed then
             let keyPressed : Game.KeyPressed = 
                 {   Up = GameClass.IsKeyDown Keys.Up
@@ -61,6 +64,8 @@ type GameClass () as game =
                     
         else
             game.SuppressDraw()
+            System.GC.Collect 1
+            
 
         time <- time + gameTime.ElapsedGameTime.TotalMilliseconds
 
