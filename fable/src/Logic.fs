@@ -75,7 +75,9 @@ module Game =
 
     [<Struct>]
     type KeyPressed = { Up : bool; Down : bool; Left : bool; Right : bool }
-        with member k.Any () = k.Up || k.Down || k.Left || k.Right
+        with 
+            member k.Any () = k.Up || k.Down || k.Left || k.Right
+            static member Default = { Up = false; Down = false; Left = false; Right = false }
     let (|IsLeftPressed|IsRightPressed|IsUpPressed|IsDownPressed|Nothing|) (kp:KeyPressed) =
         if kp.Up then IsUpPressed
         elif kp.Down then IsDownPressed
@@ -101,7 +103,6 @@ module Game =
             if fullRow then moveUp <- moveUp + 1
             if not fullRow then
                 let y' = y + moveUp
-                printfn "%A" y'
                 if y' >= 0 then
                     for x = width - 1 downto 0 do
                         Array2D.set result x y' (state.Blocks.[x, y]) 

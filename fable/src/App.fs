@@ -13,9 +13,13 @@ let state x = state2 x 0
 let n = empty
 let a = true, Some 1
 let b = false, Some 1
-let colors = [| "rgb(200,0,0)"; "rgba(0, 0, 200, 0.5)" |]
+let colors = [| "rgb(200,0,0)"; "rgb(0,200,0)"; "rgb(200,200,0)"; "rgb(200,200,200)"; "rgb(0, 0, 200)" |]
 
 let draw state = 
+    let span = Browser.document.getElementsByTagName_span().[0]
+    span.innerText <- state.Points.ToString()
+    
+
     let canvas = Browser.document.getElementsByTagName_canvas().[0]
     canvas.width <- 400.
     canvas.height <- 600.
@@ -34,17 +38,52 @@ let draw state =
                 ctx.fillRect (float <| i*rectW, float <| j*rectH, float <| rectW - rectW / 10 , float <| rectH - rectH / 10)
                 
 
-let rnd = Random()
 
-let rec init (state:State) = async {
-        
-        let state = state
-                    |> Game.move
-                    |> Game.applyTransition rnd
-                    |> Game.score
+type AgentEvent =
+| Time
+| KeyPressed of Game.KeyPressed
+
+let game = MailboxProcessor.Start (fun inbox->
+    let rnd = Random()
+    let rec loop state = async {
+        let! msg = inbox.Receive()
+        let state =
+            match msg with
+            | Time -> 
+                state
+                |> Game.move
+                |> Game.applyTransition rnd
+                |> Game.score
+            | KeyPressed keyPressed -> 
+                state
+                |> Game.applyKeyboardTransition keyPressed
+                |> Game.score
         draw state
+        return! loop state
+    }
+    loop Game.initState )
+
+
+let rec init () :Async<unit> = async {
+        game.Post Time
         do! Async.Sleep 500
-        return! init state
+        return! init ()
 }
 
-init Game.initState |> Async.StartImmediate
+init () |> Async.StartImmediate
+
+
+
+
+Browser.window.addEventListener_keypress(fun x-> 
+    match x.charCode |> int |> char with
+    | 'w' | 'W' -> { Game.KeyPressed.Default with Up = true } |> Some
+    | 'a' | 'A' -> { Game.KeyPressed.Default with Left = true }  |> Some
+    | 'd' | 'D' -> { Game.KeyPressed.Default with Right = true } |> Some
+    | 's' | 'S' -> { Game.KeyPressed.Default with Down = true } |> Some
+    | _ -> 
+        printfn "%A" x.charCode
+        None
+    |> Option.bind (KeyPressed >> game.Post >> Some)
+    |> ignore
+    box null)
