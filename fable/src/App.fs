@@ -81,9 +81,21 @@ Browser.window.addEventListener_keypress(fun x->
     | 'a' | 'A' -> { Game.KeyPressed.Default with Left = true }  |> Some
     | 'd' | 'D' -> { Game.KeyPressed.Default with Right = true } |> Some
     | 's' | 'S' -> { Game.KeyPressed.Default with Down = true } |> Some
-    | _ -> 
-        printfn "%A" x.charCode
-        None
+    | _ -> None
+    |> Option.bind (KeyPressed >> game.Post >> Some)
+    |> ignore
+    box null)
+
+
+
+
+Browser.window.addEventListener_keydown(fun x-> 
+    match x.which |> int  with
+    | 38 -> { Game.KeyPressed.Default with Up = true } |> Some
+    | 37 -> { Game.KeyPressed.Default with Left = true }  |> Some
+    | 39 -> { Game.KeyPressed.Default with Right = true } |> Some
+    | 40 -> { Game.KeyPressed.Default with Down = true } |> Some
+    | _ -> None
     |> Option.bind (KeyPressed >> game.Post >> Some)
     |> ignore
     box null)
