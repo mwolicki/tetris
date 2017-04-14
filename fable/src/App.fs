@@ -98,43 +98,51 @@ Browser.window.addEventListener_keydown(fun x->
     box null)
 
 
-let rec touchEvents startXY endXY = 
-    let body = Browser.document.body
-    
-    let(|Left|Right|Top|Down|Nothing|) ((startX, startY), (endX, endY))  =
-        let minHeightDiff  = body.clientHeight * 0.1
-        let minWidthDiff = body.clientWidth * 0.1
-        match endX-startX, endY - startY with
-        | x, _ when x > minWidthDiff -> Right
-        | x, _ when x < -minWidthDiff -> Left
-        | _, y when y > minHeightDiff -> Down
-        | _, y when y < -minHeightDiff -> Top
-        | _ -> Nothing
 
-
-    match (startXY, endXY) with
-    | Left -> { Game.KeyPressed.Default with Left = true } |> Some
-    | Right -> { Game.KeyPressed.Default with Right = true } |> Some
-    | Top -> { Game.KeyPressed.Default with Up = true } |> Some
-    | Down -> { Game.KeyPressed.Default with Down = true } |> Some
-    | Nothing -> None
-    |> Option.bind (KeyPressed >> game.Post >> Some)
-    |> ignore
 
 
 let setUpTouchEvents()  =
+
+
+
     let mutable startXY = 0., 0.
+    let mutable startXYTime =  System.DateTime.UtcNow
 
     let body = Browser.document.body
+        
+    let setStart x y =
+        startXY <- x, y
+        startXYTime <- System.DateTime.UtcNow
+
+    let(|LeftTouch|RightTouch|TopTouch|DownTouch|Nothing|) ((startX, startY), (endX, endY)) =
+        let minHeightDiff  = body.clientHeight * 0.1
+        let minWidthDiff = body.clientWidth * 0.1
+        match endX-startX, endY - startY with
+        | x, _ when x > minWidthDiff -> RightTouch
+        | x, _ when x < -minWidthDiff -> LeftTouch
+        | _, y when y > minHeightDiff -> DownTouch
+        | _, y when y < -minHeightDiff -> TopTouch
+        | _ -> Nothing
+
     body.addEventListener_touchstart (fun x->
         let touches = x.changedTouches.[0]
-        startXY <- touches.clientX, touches.clientY
+        setStart touches.clientX touches.clientY
         box null)
 
-    body.addEventListener_touchend (fun x->
-        let touches = x.changedTouches.[0]
-        printf "%A - %A" startXY (touches.clientX, touches.clientY)
-        touchEvents startXY (touches.clientX, touches.clientY)
+    body.addEventListener_touchmove (fun x->
+        if System.DateTime.UtcNow - startXYTime > TimeSpan.FromMilliseconds 100. then
+            let touches = x.changedTouches.[0]
+            
+            match (startXY, (touches.clientX, touches.clientY)) with
+            | LeftTouch -> { Game.KeyPressed.Default with Left = true } |> Some
+            | RightTouch -> { Game.KeyPressed.Default with Right = true } |> Some
+            | TopTouch -> { Game.KeyPressed.Default with Up = true } |> Some
+            | DownTouch -> { Game.KeyPressed.Default with Down = true } |> Some
+            | Nothing -> None
+            |> Option.map (fun key ->
+                setStart touches.clientX touches.clientY
+                KeyPressed key |> game.Post)
+            |> ignore
         box null)
 
 setUpTouchEvents()
