@@ -40,7 +40,7 @@ let draw state =
 
 
 type AgentEvent =
-| Time
+| Time of AsyncReplyChannel<int>
 | KeyPressed of Game.KeyPressed
 
 let game = MailboxProcessor.Start (fun inbox->
@@ -50,11 +50,14 @@ let game = MailboxProcessor.Start (fun inbox->
             let! msg = inbox.Receive()
             let state =
                 match msg with
-                | Time -> 
+                | Time reply -> 
+                    let state = 
+                        state
+                        |> Game.move
+                        |> Game.applyTransition rnd
+                        |> Game.score
+                    reply.Reply state.Points
                     state
-                    |> Game.move
-                    |> Game.applyTransition rnd
-                    |> Game.score
                 | KeyPressed keyPressed -> 
                     state
                     |> Game.applyKeyboardTransition keyPressed
@@ -135,10 +138,9 @@ let setUpTouchEvents()  =
 setUpTouchEvents()
 
 let rec init () :Async<unit> = async {
-        game.Post Time
-        do! Async.Sleep 500
-        return! init ()
-}
+        let! score = game.PostAndAsyncReply Time
+        do!  500 - (min (score * 10) 350) |> Async.Sleep
+        return! init () }
 
 init () |> Async.StartImmediate
 
