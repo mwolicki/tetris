@@ -129,7 +129,7 @@ if(typeof __g == 'number')__g = global; // eslint-disable-line no-undef
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11_babel_runtime_helpers_createClass___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_11_babel_runtime_helpers_createClass__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__Symbol__ = __webpack_require__(9);
 /* unused harmony export NonDeclaredType */
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Any; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "g", function() { return Any; });
 /* unused harmony export Unit */
 /* harmony export (immutable) */ __webpack_exports__["n"] = Option;
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() { return FableArray; });
@@ -145,13 +145,13 @@ if(typeof __g == 'number')__g = global; // eslint-disable-line no-undef
 /* unused harmony export isArray */
 /* harmony export (immutable) */ __webpack_exports__["e"] = toString;
 /* unused harmony export hash */
-/* harmony export (immutable) */ __webpack_exports__["b"] = equals;
+/* harmony export (immutable) */ __webpack_exports__["a"] = equals;
 /* unused harmony export comparePrimitives */
 /* harmony export (immutable) */ __webpack_exports__["d"] = compare;
 /* harmony export (immutable) */ __webpack_exports__["j"] = equalsRecords;
 /* harmony export (immutable) */ __webpack_exports__["k"] = compareRecords;
 /* harmony export (immutable) */ __webpack_exports__["f"] = equalsUnions;
-/* harmony export (immutable) */ __webpack_exports__["g"] = compareUnions;
+/* harmony export (immutable) */ __webpack_exports__["b"] = compareUnions;
 /* unused harmony export createDisposable */
 /* unused harmony export createObj */
 /* unused harmony export toPlainJsObj */
@@ -1490,7 +1490,7 @@ var Choice = function () {
     }, {
         key: "CompareTo",
         value: function CompareTo(other) {
-            return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__Util__["g" /* compareUnions */])(this, other);
+            return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__Util__["b" /* compareUnions */])(this, other);
         }
     }, {
         key: __WEBPACK_IMPORTED_MODULE_2__Symbol__["a" /* default */].reflection,
@@ -1498,7 +1498,7 @@ var Choice = function () {
             return {
                 type: "Microsoft.FSharp.Core.FSharpChoice",
                 interfaces: ["FSharpUnion", "System.IEquatable", "System.IComparable"],
-                cases: [["Choice1Of2", __WEBPACK_IMPORTED_MODULE_3__Util__["a" /* Any */]], ["Choice2Of2", __WEBPACK_IMPORTED_MODULE_3__Util__["a" /* Any */]]]
+                cases: [["Choice1Of2", __WEBPACK_IMPORTED_MODULE_3__Util__["g" /* Any */]], ["Choice2Of2", __WEBPACK_IMPORTED_MODULE_3__Util__["g" /* Any */]]]
             };
         }
     }, {
@@ -2865,7 +2865,7 @@ function except(itemsToExclude, source) {
     var exclusionItems = __WEBPACK_IMPORTED_MODULE_1_babel_runtime_core_js_array_from___default()(itemsToExclude);
     var testIsNotInExclusionItems = function testIsNotInExclusionItems(element) {
         return !exclusionItems.some(function (excludedItem) {
-            return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_7__Util__["b" /* equals */])(excludedItem, element);
+            return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_7__Util__["a" /* equals */])(excludedItem, element);
         });
     };
     return filter(testIsNotInExclusionItems, source);
@@ -3773,10 +3773,11 @@ module.exports = {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return colors; });
 /* harmony export (immutable) */ __webpack_exports__["g"] = draw;
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() { return AgentEvent; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "i", function() { return game; });
-/* harmony export (immutable) */ __webpack_exports__["j"] = touchEvents;
-/* harmony export (immutable) */ __webpack_exports__["k"] = setUpTouchEvents;
-/* harmony export (immutable) */ __webpack_exports__["l"] = init;
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "i", function() { return score; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "j", function() { return game; });
+/* harmony export (immutable) */ __webpack_exports__["k"] = touchEvents;
+/* harmony export (immutable) */ __webpack_exports__["l"] = setUpTouchEvents;
+/* harmony export (immutable) */ __webpack_exports__["m"] = init;
 
 
 
@@ -3836,20 +3837,26 @@ var AgentEvent = function () {
         value: function value() {
             return {
                 type: "fable.AgentEvent",
-                interfaces: ["FSharpUnion", "System.IEquatable"],
-                cases: [["Time", __WEBPACK_IMPORTED_MODULE_4__node_modules_fable_core_Util__["a" /* Any */]], ["KeyPressed", __WEBPACK_IMPORTED_MODULE_2__Logic_fs__["a" /* Game */].KeyPressed]]
+                interfaces: ["FSharpUnion", "System.IEquatable", "System.IComparable"],
+                cases: [["Time"], ["KeyPressed", __WEBPACK_IMPORTED_MODULE_2__Logic_fs__["a" /* Game */].KeyPressed]]
             };
         }
     }, {
         key: "Equals",
         value: function Equals(other) {
-            return this === other || this.tag === other.tag && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__node_modules_fable_core_Util__["b" /* equals */])(this.data, other.data);
+            return this === other || this.tag === other.tag && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__node_modules_fable_core_Util__["a" /* equals */])(this.data, other.data);
+        }
+    }, {
+        key: "CompareTo",
+        value: function CompareTo(other) {
+            return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__node_modules_fable_core_Util__["b" /* compareUnions */])(this, other) | 0;
         }
     }]);
 
     return AgentEvent;
 }();
 __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__node_modules_fable_core_Symbol__["b" /* setType */])("fable.AgentEvent", AgentEvent);
+var score = 0;
 var game = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__node_modules_fable_core_MailboxProcessor__["a" /* start */])(function (inbox) {
     var rnd = {};
 
@@ -3858,24 +3865,14 @@ var game = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__node_modules_fable
             return builder_.Delay(function () {
                 return builder_.TryWith(builder_.Delay(function () {
                     return builder_.Bind(inbox.receive(), function (_arg1) {
-                        var state_5 = void 0;
-
-                        if (_arg1.tag === 1) {
-                            state_5 = __WEBPACK_IMPORTED_MODULE_2__Logic_fs__["a" /* Game */].score(function (state_2) {
-                                return __WEBPACK_IMPORTED_MODULE_2__Logic_fs__["a" /* Game */].applyKeyboardTransition(_arg1.data, state_2);
-                            }(state_1));
-                        } else {
-                            var state_4 = __WEBPACK_IMPORTED_MODULE_2__Logic_fs__["a" /* Game */].score(function (state_3) {
-                                return __WEBPACK_IMPORTED_MODULE_2__Logic_fs__["a" /* Game */].applyTransition(rnd, state_3);
-                            }(__WEBPACK_IMPORTED_MODULE_2__Logic_fs__["a" /* Game */].move(state_1)));
-
-                            _arg1.data.reply(state_4.Points);
-
-                            state_5 = state_4;
-                        }
-
-                        draw(state_5);
-                        return builder_.ReturnFrom(loop(state_5));
+                        var state_4 = _arg1.tag === 1 ? __WEBPACK_IMPORTED_MODULE_2__Logic_fs__["a" /* Game */].score(function (state_2) {
+                            return __WEBPACK_IMPORTED_MODULE_2__Logic_fs__["a" /* Game */].applyKeyboardTransition(_arg1.data, state_2);
+                        }(state_1)) : __WEBPACK_IMPORTED_MODULE_2__Logic_fs__["a" /* Game */].score(function (state_3) {
+                            return __WEBPACK_IMPORTED_MODULE_2__Logic_fs__["a" /* Game */].applyTransition(rnd, state_3);
+                        }(__WEBPACK_IMPORTED_MODULE_2__Logic_fs__["a" /* Game */].move(state_1)));
+                        score = state_4.Points | 0;
+                        draw(state_4);
+                        return builder_.ReturnFrom(loop(state_4));
                     });
                 }), function (_arg2) {
                     console.error(_arg2);
@@ -3984,8 +3981,8 @@ function touchEvents(startXY_0, startXY_1, endXY_0, endXY_1) {
     var body = document.body;
 
     var _Left_Right_Top_Down_Nothing_ = function _Left_Right_Top_Down_Nothing_(tupledArg) {
-        var minHeightDiff = body.clientHeight * 0.07;
-        var minWidthDiff = body.clientWidth * 0.07;
+        var minHeightDiff = body.clientHeight * 0.1;
+        var minWidthDiff = body.clientWidth * 0.1;
         var matchValue_2 = [tupledArg[1][0] - tupledArg[0][0], tupledArg[1][1] - tupledArg[0][1]];
 
         if (matchValue_2[0] > minWidthDiff) {
@@ -4004,24 +4001,24 @@ function touchEvents(startXY_0, startXY_1, endXY_0, endXY_1) {
     __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__node_modules_fable_core_Util__["c" /* defaultArg */])(function () {
         var matchValue_3 = [startXY, endXY];
 
-        var activePatternResult321 = _Left_Right_Top_Down_Nothing_(matchValue_3);
+        var activePatternResult327 = _Left_Right_Top_Down_Nothing_(matchValue_3);
 
-        if (activePatternResult321.tag === 1) {
+        if (activePatternResult327.tag === 1) {
             return function () {
                 var inputRecord_8 = __WEBPACK_IMPORTED_MODULE_2__Logic_fs__["a" /* Game */].KeyPressed.Default;
                 return new __WEBPACK_IMPORTED_MODULE_2__Logic_fs__["a" /* Game */].KeyPressed(inputRecord_8.Up, inputRecord_8.Down, inputRecord_8.Left, true);
             }();
-        } else if (activePatternResult321.tag === 2) {
+        } else if (activePatternResult327.tag === 2) {
             return function () {
                 var inputRecord_9 = __WEBPACK_IMPORTED_MODULE_2__Logic_fs__["a" /* Game */].KeyPressed.Default;
                 return new __WEBPACK_IMPORTED_MODULE_2__Logic_fs__["a" /* Game */].KeyPressed(true, inputRecord_9.Down, inputRecord_9.Left, inputRecord_9.Right);
             }();
-        } else if (activePatternResult321.tag === 3) {
+        } else if (activePatternResult327.tag === 3) {
             return function () {
                 var inputRecord_10 = __WEBPACK_IMPORTED_MODULE_2__Logic_fs__["a" /* Game */].KeyPressed.Default;
                 return new __WEBPACK_IMPORTED_MODULE_2__Logic_fs__["a" /* Game */].KeyPressed(inputRecord_10.Up, true, inputRecord_10.Left, inputRecord_10.Right);
             }();
-        } else if (activePatternResult321.tag === 4) {
+        } else if (activePatternResult327.tag === 4) {
             return null;
         } else {
             return function () {
@@ -4065,12 +4062,9 @@ setUpTouchEvents();
 function init() {
     return function (builder_) {
         return builder_.Delay(function () {
-            return builder_.Bind(game.postAndAsyncReply(function (arg0_4) {
-                return new AgentEvent(0, arg0_4);
-            }), function (_arg1) {
-                return builder_.Bind(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_9__node_modules_fable_core_Async__["a" /* sleep */])(500 - (_arg1 * 10 < 350 ? _arg1 * 10 : 350)), function () {
-                    return builder_.ReturnFrom(init());
-                });
+            game.post(new AgentEvent(0));
+            return builder_.Bind(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_9__node_modules_fable_core_Async__["a" /* sleep */])(500 - (250 < score * 10 ? 250 : score * 10)), function () {
+                return builder_.ReturnFrom(init());
             });
         });
     }(__WEBPACK_IMPORTED_MODULE_6__node_modules_fable_core_AsyncBuilder__["a" /* singleton */]);
@@ -4245,7 +4239,7 @@ var List = function () {
                 for (;;) {
                     var cur1 = iter1.next(),
                         cur2 = iter2.next();
-                    if (cur1.done) return cur2.done ? true : false;else if (cur2.done) return false;else if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__Util__["b" /* equals */])(cur1.value, cur2.value)) return false;
+                    if (cur1.done) return cur2.done ? true : false;else if (cur2.done) return false;else if (!__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__Util__["a" /* equals */])(cur1.value, cur2.value)) return false;
                 }
             }
         }
@@ -6705,10 +6699,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony namespace reexport (by provided) */ __webpack_require__.d(__webpack_exports__, "colors", function() { return __WEBPACK_IMPORTED_MODULE_0__src_App_fs__["f"]; });
 /* harmony namespace reexport (by provided) */ __webpack_require__.d(__webpack_exports__, "draw", function() { return __WEBPACK_IMPORTED_MODULE_0__src_App_fs__["g"]; });
 /* harmony namespace reexport (by provided) */ __webpack_require__.d(__webpack_exports__, "AgentEvent", function() { return __WEBPACK_IMPORTED_MODULE_0__src_App_fs__["h"]; });
-/* harmony namespace reexport (by provided) */ __webpack_require__.d(__webpack_exports__, "game", function() { return __WEBPACK_IMPORTED_MODULE_0__src_App_fs__["i"]; });
-/* harmony namespace reexport (by provided) */ __webpack_require__.d(__webpack_exports__, "touchEvents", function() { return __WEBPACK_IMPORTED_MODULE_0__src_App_fs__["j"]; });
-/* harmony namespace reexport (by provided) */ __webpack_require__.d(__webpack_exports__, "setUpTouchEvents", function() { return __WEBPACK_IMPORTED_MODULE_0__src_App_fs__["k"]; });
-/* harmony namespace reexport (by provided) */ __webpack_require__.d(__webpack_exports__, "init", function() { return __WEBPACK_IMPORTED_MODULE_0__src_App_fs__["l"]; });
+/* harmony namespace reexport (by provided) */ __webpack_require__.d(__webpack_exports__, "score", function() { return __WEBPACK_IMPORTED_MODULE_0__src_App_fs__["i"]; });
+/* harmony namespace reexport (by provided) */ __webpack_require__.d(__webpack_exports__, "game", function() { return __WEBPACK_IMPORTED_MODULE_0__src_App_fs__["j"]; });
+/* harmony namespace reexport (by provided) */ __webpack_require__.d(__webpack_exports__, "touchEvents", function() { return __WEBPACK_IMPORTED_MODULE_0__src_App_fs__["k"]; });
+/* harmony namespace reexport (by provided) */ __webpack_require__.d(__webpack_exports__, "setUpTouchEvents", function() { return __WEBPACK_IMPORTED_MODULE_0__src_App_fs__["l"]; });
+/* harmony namespace reexport (by provided) */ __webpack_require__.d(__webpack_exports__, "init", function() { return __WEBPACK_IMPORTED_MODULE_0__src_App_fs__["m"]; });
 
 
 /***/ }),

@@ -40,8 +40,11 @@ let draw state =
 
 
 type AgentEvent =
-| Time of AsyncReplyChannel<int>
+| Time
 | KeyPressed of Game.KeyPressed
+
+
+let mutable score = 0
 
 let game = MailboxProcessor.Start (fun inbox->
     let rnd = Random()
@@ -50,18 +53,16 @@ let game = MailboxProcessor.Start (fun inbox->
             let! msg = inbox.Receive()
             let state =
                 match msg with
-                | Time reply -> 
-                    let state = 
-                        state
-                        |> Game.move
-                        |> Game.applyTransition rnd
-                        |> Game.score
-                    reply.Reply state.Points
+                | Time -> 
                     state
+                    |> Game.move
+                    |> Game.applyTransition rnd
+                    |> Game.score
                 | KeyPressed keyPressed -> 
                     state
                     |> Game.applyKeyboardTransition keyPressed
                     |> Game.score
+            score <- state.Points
             draw state
             return! loop state
         with e -> 
@@ -100,8 +101,8 @@ let rec touchEvents startXY endXY =
     let body = Browser.document.body
     
     let(|Left|Right|Top|Down|Nothing|) ((startX, startY), (endX, endY))  =
-        let minHeightDiff  = body.clientHeight * 0.07
-        let minWidthDiff = body.clientWidth * 0.07
+        let minHeightDiff  = body.clientHeight * 0.1
+        let minWidthDiff = body.clientWidth * 0.1
         match endX-startX, endY - startY with
         | x, _ when x > minWidthDiff -> Right
         | x, _ when x < -minWidthDiff -> Left
@@ -138,8 +139,8 @@ let setUpTouchEvents()  =
 setUpTouchEvents()
 
 let rec init () :Async<unit> = async {
-        let! score = game.PostAndAsyncReply Time
-        do!  500 - (min (score * 10) 350) |> Async.Sleep
+        game.Post Time
+        do! Async.Sleep (500 - min 250 (score*10))
         return! init () }
 
 init () |> Async.StartImmediate
