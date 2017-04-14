@@ -5,19 +5,40 @@
     body,
     html {
       position: fixed;
-    }
+      width:  100%;
+      height: 100%;
+      margin: 0px;
+      background: black;
+      color: white;
+  }
   </style>
   <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
   <title>Tetris</title>
 </head>
-<body style="touch-action: none">
-  <p>Points: <span id="points">0</span><p>
-  <canvas align="center" id="canvas" width="400" height="600"></canvas>
-  <p><pre>Keys: W - rotate, A - left, S - down, D - right<pre></p>
+<body style="touch-action: none" >
+  <h2 id="points" style="position:absolute; top:0; left:0">Points: <span id="points">0</span></h2>    
+  
+  <canvas align="center" id="canvas" width="400" height="620"></canvas>
+  <p id="p">
+    <pre>Keys: W - rotate, A - left, S - down, D - right<pre></p>
   <script src="bundle.js"></script>
   <script>
     document.ontouchmove = function(event){
       event.preventDefault(); }
+      htmlCanvas = document.getElementById('canvas')
+      // Obtain a graphics context on the canvas element for drawing.
+      context = htmlCanvas.getContext('2d');
+      function resizeCanvas() {
+            htmlCanvas.width = window.innerWidth;
+            htmlCanvas.height = window.innerHeight;
+        }
+
+        if (('ontouchstart' in window) ||     // Advanced test for touch events
+   (window.DocumentTouch && document instanceof DocumentTouch) ||
+   ((hash['touch'] && hash['touch'].offsetTop) === 9)){
+          window.resize = resizeCanvas
+          resizeCanvas()
+        }
   </script>
 </body>
 </html>
