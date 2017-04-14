@@ -97,8 +97,8 @@ let rec touchEvents startXY endXY =
     let body = Browser.document.body
     
     let(|Left|Right|Top|Down|Nothing|) ((startX, startY), (endX, endY))  =
-        let minHeightDiff  = body.clientHeight * 0.2
-        let minWidthDiff = body.clientWidth * 0.2
+        let minHeightDiff  = body.clientHeight * 0.07
+        let minWidthDiff = body.clientWidth * 0.07
         match endX-startX, endY - startY with
         | x, _ when x > minWidthDiff -> Right
         | x, _ when x < -minWidthDiff -> Left
