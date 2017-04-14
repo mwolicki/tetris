@@ -3765,7 +3765,7 @@ function init() {
     return function (builder_) {
         return builder_.Delay(function () {
             game.post(new AgentEvent(0));
-            return builder_.Bind(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_9__node_modules_fable_core_Async__["a" /* sleep */])(500 - (250 < score * 10 ? 250 : score * 10)), function () {
+            return builder_.Bind(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_9__node_modules_fable_core_Async__["a" /* sleep */])(600 - (300 < score * 5 ? 300 : score * 5)), function () {
                 return builder_.ReturnFrom(init());
             });
         });
