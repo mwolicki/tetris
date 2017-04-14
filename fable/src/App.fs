@@ -46,33 +46,25 @@ type AgentEvent =
 let game = MailboxProcessor.Start (fun inbox->
     let rnd = Random()
     let rec loop state = async {
-        let! msg = inbox.Receive()
-        let state =
-            match msg with
-            | Time -> 
-                state
-                |> Game.move
-                |> Game.applyTransition rnd
-                |> Game.score
-            | KeyPressed keyPressed -> 
-                state
-                |> Game.applyKeyboardTransition keyPressed
-                |> Game.score
-        draw state
-        return! loop state
-    }
+        try
+            let! msg = inbox.Receive()
+            let state =
+                match msg with
+                | Time -> 
+                    state
+                    |> Game.move
+                    |> Game.applyTransition rnd
+                    |> Game.score
+                | KeyPressed keyPressed -> 
+                    state
+                    |> Game.applyKeyboardTransition keyPressed
+                    |> Game.score
+            draw state
+            return! loop state
+        with e -> 
+            Browser.console.error e 
+            return! loop state }
     loop Game.initState )
-
-
-let rec init () :Async<unit> = async {
-        game.Post Time
-        do! Async.Sleep 500
-        return! init ()
-}
-
-init () |> Async.StartImmediate
-
-
 
 
 Browser.window.addEventListener_keypress(fun x-> 
@@ -99,3 +91,54 @@ Browser.window.addEventListener_keydown(fun x->
     |> Option.bind (KeyPressed >> game.Post >> Some)
     |> ignore
     box null)
+
+
+let rec touchEvents startXY endXY = 
+    let body = Browser.document.body
+    
+    let(|Left|Right|Top|Down|Nothing|) ((startX, startY), (endX, endY))  =
+        let minHeightDiff  = body.clientHeight * 0.2
+        let minWidthDiff = body.clientWidth * 0.2
+        match endX-startX, endY - startY with
+        | x, _ when x > minWidthDiff -> Right
+        | x, _ when x < -minWidthDiff -> Left
+        | _, y when y > minHeightDiff -> Down
+        | _, y when y < -minHeightDiff -> Top
+        | _ -> Nothing
+
+
+    match (startXY, endXY) with
+    | Left -> { Game.KeyPressed.Default with Left = true } |> Some
+    | Right -> { Game.KeyPressed.Default with Right = true } |> Some
+    | Top -> { Game.KeyPressed.Default with Up = true } |> Some
+    | Down -> { Game.KeyPressed.Default with Down = true } |> Some
+    | Nothing -> None
+    |> Option.bind (KeyPressed >> game.Post >> Some)
+    |> ignore
+
+
+let setUpTouchEvents()  =
+    let mutable startXY = 0., 0.
+
+    let body = Browser.document.body
+    body.addEventListener_touchstart (fun x->
+        let touches = x.changedTouches.[0]
+        startXY <- touches.clientX, touches.clientY
+        box null)
+
+    body.addEventListener_touchend (fun x->
+        let touches = x.changedTouches.[0]
+        printf "%A - %A" startXY (touches.clientX, touches.clientY)
+        touchEvents startXY (touches.clientX, touches.clientY)
+        box null)
+
+setUpTouchEvents()
+
+let rec init () :Async<unit> = async {
+        game.Post Time
+        do! Async.Sleep 500
+        return! init ()
+}
+
+init () |> Async.StartImmediate
+
