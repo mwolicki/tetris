@@ -3978,8 +3978,8 @@ function touchEvents(startXY_0, startXY_1, endXY_0, endXY_1) {
     var body = document.body;
 
     var _Left_Right_Top_Down_Nothing_ = function _Left_Right_Top_Down_Nothing_(tupledArg) {
-        var minHeightDiff = body.clientHeight * 0.2;
-        var minWidthDiff = body.clientWidth * 0.2;
+        var minHeightDiff = body.clientHeight * 0.07;
+        var minWidthDiff = body.clientWidth * 0.07;
         var matchValue_2 = [tupledArg[1][0] - tupledArg[0][0], tupledArg[1][1] - tupledArg[0][1]];
 
         if (matchValue_2[0] > minWidthDiff) {
