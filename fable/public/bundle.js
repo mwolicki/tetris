@@ -3817,8 +3817,11 @@ function draw(state_1) {
 
             if (patternInput[1] != null) {
                 ctx.fillStyle = colors[patternInput[1] % colors.length];
-                ctx.fillRect(i * rectW, j * rectH, rectW - ~~(rectW / 10), rectH - ~~(rectH / 10));
+            } else {
+                ctx.fillStyle = "rgb(20,20,20)";
             }
+
+            ctx.fillRect(i * rectW, j * rectH, rectW - ~~(rectW / 10), rectH - ~~(rectH / 10));
         }
     }
 }

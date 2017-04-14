@@ -34,7 +34,9 @@ let draw state =
             let (_, color) = state.Blocks.[i,j]
             if Option.isSome color then
                 ctx.fillStyle <- !^colors.[color.Value % colors.Length]
-                ctx.fillRect (float <| i*rectW, float <| j*rectH, float <| rectW - rectW / 10 , float <| rectH - rectH / 10)
+            else
+                ctx.fillStyle <- !^"rgb(20,20,20)"            
+            ctx.fillRect (float <| i*rectW, float <| j*rectH, float <| rectW - rectW / 10 , float <| rectH - rectH / 10)
                 
 
 

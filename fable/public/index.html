@@ -11,10 +11,6 @@
       background: black;
       color: white;
   }
-  canvas {
-    border-color:#303030; 
-    border-style:solid
-  }
   </style>
   <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
   <title>Tetris</title>
@@ -40,8 +36,8 @@
         if (('ontouchstart' in window) ||     // Advanced test for touch events
    (window.DocumentTouch && document instanceof DocumentTouch) ||
    ((hash['touch'] && hash['touch'].offsetTop) === 9)){
-          window.resize = resizeCanvas
-          resizeCanvas()
+            addEventListener('resize', function(){resizeCanvas()}, true);
+            resizeCanvas()
         }
   </script>
 </body>
