@@ -21,8 +21,7 @@ let draw state =
     
 
     let canvas = Browser.document.getElementsByTagName_canvas().[0]
-    canvas.width <- 400.
-    canvas.height <- 600.
+    
     let ctx = canvas.getContext_2d()
     ctx.fillStyle <- !^"black"
     ctx.fillRect (0., 0., canvas.width, canvas.height)

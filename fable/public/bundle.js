@@ -3805,8 +3805,6 @@ function draw(state_1) {
     var span = document.getElementsByTagName('span')[0];
     span.innerText = String(state_1.Points);
     var canvas = document.getElementsByTagName('canvas')[0];
-    canvas.width = 400;
-    canvas.height = 600;
     var ctx = canvas.getContext('2d');
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
