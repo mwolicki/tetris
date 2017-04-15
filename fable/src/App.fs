@@ -39,12 +39,9 @@ let draw state =
             ctx.fillRect (float <| i*rectW, float <| j*rectH, float <| rectW - rectW / 10 , float <| rectH - rectH / 10)
                 
 
-
 type AgentEvent =
 | Time
 | KeyPressed of Game.KeyPressed
-
-
 let mutable score = 0
 
 let game = MailboxProcessor.Start (fun inbox->
@@ -71,7 +68,6 @@ let game = MailboxProcessor.Start (fun inbox->
             return! loop state }
     loop Game.initState )
 
-
 Browser.window.addEventListener_keypress(fun x-> 
     match x.charCode |> int |> char with
     | 'w' | 'W' -> { Game.KeyPressed.Default with Up = true } |> Some
@@ -82,9 +78,6 @@ Browser.window.addEventListener_keypress(fun x->
     |> Option.bind (KeyPressed >> game.Post >> Some)
     |> ignore
     box null)
-
-
-
 
 Browser.window.addEventListener_keydown(fun x-> 
     match x.which |> int  with
@@ -97,13 +90,7 @@ Browser.window.addEventListener_keydown(fun x->
     |> ignore
     box null)
 
-
-
-
-
 let setUpTouchEvents()  =
-
-
 
     let mutable startXY = 0., 0.
     let mutable startXYTime =  System.DateTime.UtcNow
@@ -130,7 +117,7 @@ let setUpTouchEvents()  =
         box null)
 
     body.addEventListener_touchmove (fun x->
-        if System.DateTime.UtcNow - startXYTime > TimeSpan.FromMilliseconds 100. then
+        if System.DateTime.UtcNow - startXYTime > TimeSpan.FromMilliseconds 50. then
             let touches = x.changedTouches.[0]
             
             match (startXY, (touches.clientX, touches.clientY)) with

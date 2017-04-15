@@ -3718,7 +3718,7 @@ function setUpTouchEvents() {
         return null;
     });
     body.addEventListener('touchmove', function (x_4) {
-        if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_7__node_modules_fable_core_Date__["b" /* op_Subtraction */])(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_7__node_modules_fable_core_Date__["a" /* utcNow */])(), startXYTime) > 100) {
+        if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_7__node_modules_fable_core_Date__["b" /* op_Subtraction */])(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_7__node_modules_fable_core_Date__["a" /* utcNow */])(), startXYTime) > 50) {
             var touches_1 = x_4.changedTouches[0];
             __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__node_modules_fable_core_Util__["c" /* defaultArg */])(function () {
                 var matchValue_3 = [startXY, [touches_1.clientX, touches_1.clientY]];
@@ -6857,7 +6857,7 @@ var Game = function (__exports) {
         }
     };
 
-    var blocks = __exports.blocks = [["X", "X", "XX"], ["XX", "X", "X"], [" X ", "XXX"], [" SS", "SS"], ["ZZ ", " ZZ"], ["XXXX"], ["XX", "XX"], ["  X", " X"]];
+    var blocks = __exports.blocks = [["X", "X", "XX"], ["XX", "X", "X"], [" X ", "XXX"], [" SS", "SS"], ["ZZ ", " ZZ"], ["XXXX"], ["X"], ["XX", "XX"], ["  X", " X"]];
 
     var getRandomBlock = __exports.getRandomBlock = function (rnd) {
         var str = blocks[__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__node_modules_fable_core_Util__["o" /* randomNext */])(0, blocks.length)];

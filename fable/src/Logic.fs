@@ -251,6 +251,8 @@ module Game =
 
                     [| "XXXX"|];
 
+                    [| "X"|];
+
                     [|"XX"
                       "XX"|];
                       
