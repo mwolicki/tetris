@@ -6857,7 +6857,7 @@ var Game = function (__exports) {
         }
     };
 
-    var blocks = __exports.blocks = [["L", "L", "LL"], [" J", " J", "JJ"], [" X ", "XXX"], [" SS", "SS"], ["ZZ ", " ZZ"], ["XXXX"], ["D"], ["CC", "CC"], ["X", "X"]];
+    var blocks = __exports.blocks = [["L", "L", "LL"], [" J", " J", "JJ"], [" X ", "XXX"], [" SS", "SS"], ["ZZ ", " ZZ"], ["XXXX"], ["CC", "CC"], ["X", "X"]];
 
     var getRandomBlock = __exports.getRandomBlock = function (rnd) {
         var str = blocks[__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__node_modules_fable_core_Util__["o" /* randomNext */])(0, blocks.length)];
