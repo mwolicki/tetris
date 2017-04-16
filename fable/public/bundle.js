@@ -3508,7 +3508,7 @@ function n() {
 }
 var a = [true, 1];
 var b = [false, 1];
-var colors = ["rgb(200,0,0)", "rgb(0,200,0)", "rgb(200,200,0)", "rgb(255,255,255)", "rgb(255,140,0)", "rgb(68, 211, 255)"];
+var colors = ["rgb(255, 73, 73)", "rgb(0,200,0)", "rgb(200,200,0)", "rgb(255,255,255)", "rgb(255,140,0)", "rgb(68, 211, 255)"];
 function draw(state_1) {
     var span = document.getElementsByTagName('span')[0];
     span.innerText = String(state_1.Points);
