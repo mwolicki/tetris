@@ -136,7 +136,7 @@ setUpTouchEvents()
 
 let rec init () :Async<unit> = async {
         game.Post Time
-        do! Async.Sleep (1000 - min 700 (score * 5))
+        do! Async.Sleep (1000 - min 600 (score * 6))
         return! init () }
 
 init () |> Async.StartImmediate
