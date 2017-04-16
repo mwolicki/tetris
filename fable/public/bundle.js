@@ -3765,7 +3765,7 @@ function init() {
     return function (builder_) {
         return builder_.Delay(function () {
             game.post(new AgentEvent(0));
-            return builder_.Bind(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_9__node_modules_fable_core_Async__["a" /* sleep */])(1000 - (700 < score * 10 ? 700 : score * 10)), function () {
+            return builder_.Bind(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_9__node_modules_fable_core_Async__["a" /* sleep */])(1000 - (700 < score * 5 ? 700 : score * 5)), function () {
                 return builder_.ReturnFrom(init());
             });
         });
@@ -6857,7 +6857,7 @@ var Game = function (__exports) {
         }
     };
 
-    var blocks = __exports.blocks = [["X", "X", "XX"], ["XX", "X", "X"], [" X ", "XXX"], [" SS", "SS"], ["ZZ ", " ZZ"], ["XXXX"], ["X"], ["XX", "XX"], ["  X", " X"]];
+    var blocks = __exports.blocks = [["L", "L", "LL"], [" J", " J", "JJ"], [" X ", "XXX"], [" SS", "SS"], ["ZZ ", " ZZ"], ["XXXX"], ["D"], ["CC", "CC"], ["X", "X"]];
 
     var getRandomBlock = __exports.getRandomBlock = function (rnd) {
         var str = blocks[__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__node_modules_fable_core_Util__["o" /* randomNext */])(0, blocks.length)];

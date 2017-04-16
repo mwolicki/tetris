@@ -232,13 +232,13 @@ module Game =
         else { state with Blocks = state.Blocks |> Array2D.map (fun  (_, c)-> (false, c)) }
 
     let blocks : string array array = 
-                  [| [| "X"
-                        "X"
-                        "XX"|];
+                  [| [| "L"
+                        "L"
+                        "LL"|];
 
-                     [| "XX"
-                        "X"
-                        "X"|];
+                     [| " J"
+                        " J"
+                        "JJ"|];
 
                     [|  " X ";
                         "XXX"|];
@@ -251,13 +251,13 @@ module Game =
 
                     [| "XXXX"|];
 
-                    [| "X"|];
+                    [| "D"|];
 
-                    [|"XX"
-                      "XX"|];
+                    [|"CC"
+                      "CC"|];
                       
-                    [|"  X"
-                      " X" |] |]
+                    [|"X"
+                      "X" |] |]
               
     let getRandomBlock (rnd:Random) =
             let str = blocks.[rnd.Next blocks.Length]
