@@ -13,7 +13,7 @@ let state x = state2 x 0
 let n = empty
 let a = true, Some 1
 let b = false, Some 1
-let colors = [| "rgb(200,0,0)"; "rgb(0,200,0)"; "rgb(200,200,0)"; "rgb(200,200,200)"; "rgb(0, 0, 200)" |]
+let colors = [| "rgb(200,0,0)"; "rgb(0,200,0)"; "rgb(200,200,0)"; "rgb(255,255,255)"; "rgb(255,140,0)"; "rgb(68, 211, 255)" |]
 
 let draw state = 
     let span = Browser.document.getElementsByTagName_span().[0]
