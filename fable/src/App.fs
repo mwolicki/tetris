@@ -7,18 +7,22 @@ open game.Game
 open game
 open System
 
+let startGameTime = DateTime.UtcNow
 let state2 x p = { Blocks = Array2D.ofList x; Points = p }
 let state x = state2 x 0
 
 let n = empty
 let a = true, Some 1
 let b = false, Some 1
-let colors = [| "rgb(255, 73, 73)"; "rgb(0,200,0)"; "rgb(200,200,0)"; "rgb(255,255,255)"; "rgb(255,140,0)"; "rgb(68, 211, 255)" |]
+let colors = [| "rgb(255, 73, 73)"; "rgb(0,200,0)"; "rgb(200,200,0)"; "rgb(200,200,200)"; "rgb(255,140,0)"; "rgb(68, 211, 255)" |]
 
 let draw state = 
     let span = Browser.document.getElementsByTagName_span().[0]
     span.innerText <- state.Points.ToString()
-    
+
+    let time = Browser.document.getElementsByTagName_span().[1]
+    let elapsedTime = (DateTime.UtcNow - startGameTime).TotalSeconds |> int
+    time.innerText <- elapsedTime.ToString()
 
     let canvas = Browser.document.getElementsByTagName_canvas().[0]
     
@@ -136,7 +140,8 @@ setUpTouchEvents()
 
 let rec init () :Async<unit> = async {
         game.Post Time
-        do! Async.Sleep (1000 - min 600 (score * 6))
+        let sleep = 300. * abs (Math.Sin(float score /50.)) + float score/2. |> int
+        do! Async.Sleep (1000 - (min 600 sleep))
         return! init () }
 
 init () |> Async.StartImmediate
