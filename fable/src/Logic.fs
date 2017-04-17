@@ -106,7 +106,8 @@ module Game =
                 if y' >= 0 then
                     for x = width - 1 downto 0 do
                         Array2D.set result x y' (state.Blocks.[x, y]) 
-        { state with Blocks = result; Points = state.Points + moveUp }
+        let points = Seq.init (moveUp+1) id |> Seq.sum
+        { state with Blocks = result; Points = state.Points + points }
 
     let canApplyKeyboardTransition (keyPressed:KeyPressed) (state:State) =
         let width = state.Blocks.Length1

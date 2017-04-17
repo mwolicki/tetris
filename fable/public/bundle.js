@@ -2312,11 +2312,11 @@ var MIN_VALUE = fromBits(0, 0x80000000 | 0, false);
 /* unused harmony export enumerateUsing */
 /* unused harmony export exactlyOne */
 /* unused harmony export except */
-/* harmony export (immutable) */ __webpack_exports__["k"] = exists;
+/* harmony export (immutable) */ __webpack_exports__["m"] = exists;
 /* unused harmony export exists2 */
-/* harmony export (immutable) */ __webpack_exports__["i"] = filter;
+/* harmony export (immutable) */ __webpack_exports__["k"] = filter;
 /* unused harmony export where */
-/* harmony export (immutable) */ __webpack_exports__["j"] = fold;
+/* harmony export (immutable) */ __webpack_exports__["l"] = fold;
 /* unused harmony export foldBack */
 /* unused harmony export fold2 */
 /* unused harmony export foldBack2 */
@@ -2324,7 +2324,7 @@ var MIN_VALUE = fromBits(0, 0x80000000 | 0, false);
 /* unused harmony export forAll2 */
 /* unused harmony export tryHead */
 /* unused harmony export head */
-/* unused harmony export initialize */
+/* harmony export (immutable) */ __webpack_exports__["j"] = initialize;
 /* unused harmony export initializeInfinite */
 /* unused harmony export tryItem */
 /* harmony export (immutable) */ __webpack_exports__["e"] = item;
@@ -2363,7 +2363,7 @@ var MIN_VALUE = fromBits(0, 0x80000000 | 0, false);
 /* unused harmony export skip */
 /* unused harmony export skipWhile */
 /* unused harmony export sortWith */
-/* unused harmony export sum */
+/* harmony export (immutable) */ __webpack_exports__["i"] = sum;
 /* unused harmony export sumBy */
 /* unused harmony export tail */
 /* unused harmony export take */
@@ -6514,7 +6514,10 @@ var Game = function (__exports) {
             _loop(y);
         }
 
-        return new State(result, state.Points + moveUp);
+        var points = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__node_modules_fable_core_Seq__["i" /* sum */])(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__node_modules_fable_core_Seq__["j" /* initialize */])(moveUp + 1, function (x_3) {
+            return x_3;
+        })) | 0;
+        return new State(result, state.Points + points);
     };
 
     var canApplyKeyboardTransition = __exports.canApplyKeyboardTransition = function (keyPressed, state) {
@@ -6564,7 +6567,7 @@ var Game = function (__exports) {
 
             return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__node_modules_fable_core_Seq__["f" /* forAll */])(function (tupledArg) {
                 return isValidMove(tupledArg[0], tupledArg[1]);
-            }, __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__node_modules_fable_core_Seq__["i" /* filter */])(function (tupledArg_1) {
+            }, __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__node_modules_fable_core_Seq__["k" /* filter */])(function (tupledArg_1) {
                 return tupledArg_1[2][0];
             }, Array2D.toSeq(state.Blocks)));
         }
@@ -6589,9 +6592,9 @@ var Game = function (__exports) {
                 case 1:
                     return null;
             }
-        }(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__node_modules_fable_core_Seq__["j" /* fold */])(function (tupledArg, tupledArg_1) {
+        }(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__node_modules_fable_core_Seq__["l" /* fold */])(function (tupledArg, tupledArg_1) {
             return [min(tupledArg[0], tupledArg_1[0]), max(tupledArg[1], tupledArg_1[0]), min(tupledArg[2], tupledArg_1[1]), max(tupledArg[3], tupledArg_1[1])];
-        }, [null, null, null, null], __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__node_modules_fable_core_Seq__["i" /* filter */])(function (tupledArg_2) {
+        }, [null, null, null, null], __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__node_modules_fable_core_Seq__["k" /* filter */])(function (tupledArg_2) {
             return tupledArg_2[2][0];
         }, Array2D.toSeq(state.Blocks))));
     };
@@ -6620,11 +6623,11 @@ var Game = function (__exports) {
                     case 1:
                         return null;
                 }
-            }(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__node_modules_fable_core_Seq__["k" /* exists */])(function (tupledArg) {
+            }(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__node_modules_fable_core_Seq__["m" /* exists */])(function (tupledArg) {
                 return (((tupledArg[0] >= patternInput[0] ? tupledArg[0] <= patternInput[1] : false) ? tupledArg[1] >= patternInput[2] : false) ? tupledArg[1] <= patternInput[3] : false) ? !tupledArg[2][0] ? tupledArg[2][1] != null : false : false;
             }, Array2D.toSeq(state.Blocks)));
         } else {
-            throw new Error("/Users/kevin/Projects/tetris/fable/src/Logic.fs", 144, 12);
+            throw new Error("/Users/kevin/Projects/tetris/fable/src/Logic.fs", 145, 12);
         }
     };
 
@@ -6840,7 +6843,7 @@ var Game = function (__exports) {
 
         return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__node_modules_fable_core_Seq__["f" /* forAll */])(function (tupledArg) {
             return isValidMove(tupledArg[0], tupledArg[1]);
-        }, __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__node_modules_fable_core_Seq__["i" /* filter */])(function (tupledArg_1) {
+        }, __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__node_modules_fable_core_Seq__["k" /* filter */])(function (tupledArg_1) {
             return tupledArg_1[2][0];
         }, Array2D.toSeq(state.Blocks)));
     };
