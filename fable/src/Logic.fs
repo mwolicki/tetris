@@ -274,9 +274,7 @@ module Game =
             let color = rnd.Next 255
 
             Array2D.iteri (fun (x, y, (v:int8)) -> 
-                printfn "%i %i %A" x y v
                 if v.IsActive then 
-                    Array2D.set blocks (x+middle-1) y v
-                    printfn "##%i %i %A" (x+middle-1) y v) nextBlock
+                    Array2D.set blocks (x+middle-1) y v) nextBlock
         { state with Blocks = blocks}
 
