@@ -19,11 +19,11 @@ module Array2D =
             override x.GetEnumerator () = x.ToSeq().GetEnumerator()
             override x.GetEnumerator () = x.ToSeq().GetEnumerator() :> Collections.IEnumerator
 
-    let exists f arr = arr.arr |> Array.exists f
+    let inline exists f arr = arr.arr |> Array.exists f
 
-    let set (arr:Array2D<_>) a b v = arr.[a,b] <- v
+    let inline set (arr:Array2D<_>) a b v = arr.[a,b] <- v
 
-    let init x y f =
+    let inline init x y f =
         { base1 = x
           base2 = y
           arr = [| for i = 0 to x - 1 do 
@@ -33,7 +33,7 @@ module Array2D =
 
     let inline map f = mapi (fun _ _ x -> f x)
 
-    let iteri f arr = arr |> Seq.iter f
+    let inline iteri f arr = arr |> Seq.iter f
 
     let ofList (l:'a list list) =
         let x = l.Length
@@ -41,7 +41,12 @@ module Array2D =
         init y x (fun x y -> (l.Item y).Item x)
 
 module Game =
-    type Color = int
+    type Color = int8
+    type System.SByte with
+        member s.IsActive = s < 0y
+        member s.IsNone = s = 0y
+        member s.IsPassive = s > 0y
+        member s.IsNotPassive = s <= 0y
 
     [<RequireQualifiedAccess>]
     module BoardSize = 
@@ -51,10 +56,7 @@ module Game =
         let height = 15
 
     [<Struct>]
-    type Block = { Color:Color }
-
-    [<Struct>]
-    type State = { Blocks : int8 Array2D.Array2D; Points : int }
+    type State = { Blocks : Color Array2D.Array2D; Points : int }
 
     [<Struct>]
     type KeyPressed = { Up : bool; Down : bool; Left : bool; Right : bool }
@@ -72,17 +74,10 @@ module Game =
 
     let initState = { Blocks = Array2D.create BoardSize.width BoardSize.height empty; Points = 0 }
 
-    type System.SByte with
-        member s.IsActive = s < 0y
-        member s.IsNone = s = 0y
-        member s.IsSomething = s <> 0y
-        member s.IsPassive = s > 0y
-        member s.Color = abs s
-
     let score (state:State) : State =
         let width = state.Blocks.Length1
         let height = state.Blocks.Length2
-        let result = Array2D.init width height (fun _ _ -> empty)
+        let result = Array2D.create width height empty
         let mutable moveUp = 0
         for y = height - 1 downto 0 do
             let fullRow = 
@@ -102,17 +97,15 @@ module Game =
         let height = state.Blocks.Length2
         if not <| keyPressed.Any () then true
         else
-            let isValidMove x y = 
+            let isValidMove (x, y, _) = 
                 match keyPressed with
-                | IsLeftPressed -> x > 0 && (state.Blocks.[x-1,y].IsActive || state.Blocks.[x-1,y].IsNone)
-                | IsRightPressed -> x < width - 1 && (state.Blocks.[x+1,y].IsActive || state.Blocks.[x+1,y].IsNone)
-                | IsDownPressed -> y < height - 1 && (state.Blocks.[x,y+1].IsActive || state.Blocks.[x,y+1].IsNone)
+                | IsLeftPressed -> x > 0 && state.Blocks.[x-1,y].IsNotPassive
+                | IsRightPressed -> x < width - 1 && state.Blocks.[x+1,y].IsNotPassive
+                | IsDownPressed -> y < height - 1 && state.Blocks.[x,y+1].IsNotPassive
                 | _ -> true
             state.Blocks
-            |> Seq.filter (fun (_,_,v)->v.IsActive)
-            |> Seq.forall (fun (x,y,_) -> isValidMove x y)
-
-
+            |> Seq.filter (fun (_,_,v) -> v.IsActive)
+            |> Seq.forall isValidMove
 
     let activeBlockSpace (state:State) =
         let min a b = (match a with None -> b | Some a -> min a b) |> Some
@@ -190,19 +183,14 @@ module Game =
         else state
 
     let canMove (state:State) =
-        let width = state.Blocks.Length1
         let height = state.Blocks.Length2
-        let isValidMove x y = 
-            if y = height - 1 then 
-                false
-            else 
-                let v = state.Blocks.[x,y+1]
-                v.IsActive || v.IsNone
+        let isValidMove (x, y, _) = 
+            if y = height - 1 then false
+            else state.Blocks.[x,y+1].IsNotPassive
 
         state.Blocks 
         |> Seq.filter (fun (_,_,v)->v.IsActive)
-        |> Seq.forall (fun  (x,y,_) -> 
-            isValidMove x y)
+        |> Seq.forall isValidMove
 
     let move (state:State) =
         if canMove state then

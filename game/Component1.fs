@@ -1,5 +1,5 @@
 ﻿namespace game
-
+open Game
 open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Graphics
 open Microsoft.Xna.Framework.Input
@@ -7,7 +7,6 @@ open System
 
 
 module GameDraw = 
-    open Game
     let colors = [| Color.Red; Color.Gold; Color.Green; Color.Yellow; Color.Blue; Color.Violet; Color.WhiteSmoke; 
                     Color.Brown; Color.Orange; Color.Aqua; Color.Chocolate |]
     
@@ -17,8 +16,8 @@ module GameDraw =
          seq { for i = 0 to state.Blocks.Length1 - 1 do
                  for j = 0 to state.Blocks.Length2 - 1 do
                      let color = state.Blocks.[i,j] |> int |> abs
-                     if color > 0 then
-                         yield  (Rectangle(i*rectW, j*rectH, rectW - rectW / 10 , rectH - rectH / 10), colors.[color % colors.Length]) }
+                     let color = if color > 0 then colors.[color % colors.Length] else Color(0.1f, 0.1f, 0.1f) 
+                     yield  (Rectangle(i*rectW + rectW / 20, j*rectH + rectH / 20, rectW - rectW / 20 , rectH - rectH / 20), color) }
 
 
 type GameClass () as game =
@@ -26,8 +25,8 @@ type GameClass () as game =
     let graphics = new GraphicsDeviceManager (game)
     let mutable spriteBatch : SpriteBatch = null
     let mutable whiteRectangle : Texture2D = null
-    let mutable time = 1000.
-    let mutable time2 = 1000.
+    let mutable time = 10000.
+    let mutable time2 = 10000.
     let mutable state = Game.initState
     let rnd = Random()
     do
@@ -46,9 +45,9 @@ type GameClass () as game =
         if GameClass.IsKeyDown Keys.R then
             state <- Game.initState
 
-        let speed = 600. - float (min (state.Points * 10) 350)
-        if time2 > 120. || time > speed then
-            if time2 > 120. then
+        let speed = 1000. - float (min (state.Points * 10) 600)
+        if time2 > 100. || time > speed then
+            if time2 > 100. then
                 time2 <- 0.
                 let keyPressed : Game.KeyPressed = 
                     {   Up = GameClass.IsKeyDown Keys.Up

@@ -140,7 +140,7 @@ setUpTouchEvents()
 
 let rec init () :Async<unit> = async {
         game.Post Time
-        let sleep = 300. * abs (Math.Sin(float score /50.)) + float score/2. |> int
+        let sleep = score * 10
         do! Async.Sleep (1000 - (min 600 sleep))
         return! init () }
 
