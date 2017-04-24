@@ -16,9 +16,9 @@ module GameDraw =
          let rectW = width/BoardSize.width
          seq { for i = 0 to state.Blocks.Length1 - 1 do
                  for j = 0 to state.Blocks.Length2 - 1 do
-                     let (_, color) = state.Blocks.[i,j]
-                     if Option.isSome color then
-                         yield  (Rectangle(i*rectW, j*rectH, rectW - rectW / 10 , rectH - rectH / 10), colors.[color.Value % colors.Length]) }
+                     let color = state.Blocks.[i,j] |> int
+                     if color <> 0 then
+                         yield  (Rectangle(i*rectW, j*rectH, rectW - rectW / 10 , rectH - rectH / 10), colors.[color % colors.Length]) }
 
 
 type GameClass () as game =

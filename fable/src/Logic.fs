@@ -259,11 +259,10 @@ module Game =
               
     let getRandomBlock (rnd:Random) =
             let str = blocks.[rnd.Next blocks.Length]
-            let c = (int System.SByte.MaxValue) + 1 |> rnd.Next
-            let c = -c |> int8
+            let c = int System.SByte.MaxValue |> rnd.Next
+            let c = -c - 1 |> int8
 
             Array2D.init 3 4 (fun x y-> if str.Length > x && str.[x].Length > y && str.[x].[y] <> ' ' then c else 0y)
-
 
     let applyTransition (rnd:Random) (state:State) =
         let blocks = state.Blocks
@@ -277,4 +276,3 @@ module Game =
                 if v.IsActive then 
                     Array2D.set blocks (x+middle-1) y v) nextBlock
         { state with Blocks = blocks}
-
