@@ -19,19 +19,19 @@ module Array2D =
             override x.GetEnumerator () = x.ToSeq().GetEnumerator()
             override x.GetEnumerator () = x.ToSeq().GetEnumerator() :> Collections.IEnumerator
 
-    let inline exists f arr = arr.arr |> Array.exists f
+    let exists f arr = arr.arr |> Array.exists f
 
     let inline set (arr:Array2D<_>) a b v = arr.[a,b] <- v
 
-    let inline init x y f =
+    let init x y f =
         { base1 = x
           base2 = y
           arr = [| for i = 0 to x - 1 do 
                    for j = 0 to y - 1 do yield f i j |] }
-    let inline create a b x = init a b (fun _ _ -> x)
-    let inline mapi f arr = init arr.base1 arr.base2 (fun i j -> f i j arr.[i,j])
+    let create a b x = init a b (fun _ _ -> x)
+    let mapi f arr = init arr.base1 arr.base2 (fun i j -> f i j arr.[i,j])
 
-    let inline map f = mapi (fun _ _ x -> f x)
+    let map f = mapi (fun _ _ x -> f x)
 
     let inline iteri f arr = arr |> Seq.iter f
 
