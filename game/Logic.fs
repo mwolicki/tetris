@@ -6,34 +6,31 @@ module Array2D =
     type Array2D<'a> = private { 
         base1 : int
         base2 : int
-        arr: 'a array array
-    }
+        arr: 'a array }
     with 
-        member x.Item 
-            with get(i1, i2) = x.arr.[i1].[i2]
-            and set (i1, i2) (value:'a) = x.arr.[i1].[i2] <- value
+        member a.Item 
+            with get(x, y) = 
+                if x >= 0 && x < a.base1 && y >= 0 && y < a.base2 then
+                    a.arr.[a.base2 * x + y]
+                else raise (System.IndexOutOfRangeException ())
+            and set (x, y) (value:'a) = 
+                if x >= 0 && x < a.base1 && y >= 0 && y < a.base2 then            
+                    a.arr.[a.base2 * x + y] <- value
+                else raise (System.IndexOutOfRangeException ())
         member x.Length1 = x.base1
         member x.Length2 = x.base2
+        override x.ToString () = sprintf "%A" x.arr
 
-    let exists f arr = 
-        let iLength = arr.base1
-        let jLength = arr.base2
-        let rec exists' i j =
-            match arr.[i,j] |> f with
-            | true -> true
-            | _ when j < jLength - 1 -> exists' i (j+1)
-            | _ when i < iLength - 1 -> exists' (i+1) 0
-            | _ -> false
-        exists' 0 0
+    let exists f arr = arr.arr |> Array.exists f
 
-    let set (arr:Array2D<_>) a b v = arr.[a,b]<-v
+    let set (arr:Array2D<_>) a b v = arr.[a,b] <- v
 
-    let init a b f =
-        { base1 = a 
-          base2 = b
-          arr = [| for i = 0 to a - 1 do
-                        yield [| for j = 0 to b - 1 do
-                                    yield f i j|] |] }
+    let init x y f =
+        { base1 = x
+          base2 = y
+          arr = [| for i = 0 to x - 1 do
+                        for j = 0 to y - 1 do
+                                    yield f i j |] }
     let create a b x = init a b (fun _ _ -> x)
     let mapi f arr =
         init arr.base1 arr.base2 (fun i j -> f i j arr.[i,j])
@@ -47,10 +44,7 @@ module Array2D =
               for j = 0 to jLength - 1 do
                 yield (i, j, arr.[i,j]) }
 
-    let iteri f arr =
-        for i = 0 to arr.base1 - 1 do
-              for j = 0 to arr.base2 - 1 do
-                f i j arr.[i,j]
+    let iteri f arr = arr |> toSeq |> Seq.iter f
 
     let ofList (l:'a list list) =
         let x = l.Length
@@ -71,7 +65,7 @@ module Game =
     type Block = { Color:Color }
 
     [<Struct>]
-    type State = { Blocks : (bool * Color option) Array2D.Array2D; Points : int }
+    type State = { Blocks : int8 Array2D.Array2D; Points : int }
 
     [<Struct>]
     type KeyPressed = { Up : bool; Down : bool; Left : bool; Right : bool }
@@ -85,28 +79,34 @@ module Game =
         elif kp.Right then IsRightPressed
         else Nothing
 
-    let empty = false, None
+    let empty = 0y
 
     let initState = { Blocks = Array2D.create BoardSize.width BoardSize.height empty; Points = 0 }
 
+    type System.SByte with
+        member s.IsActive = s < 0y
+        member s.IsNone = s = 0y
+        member s.IsSomething = s <> 0y
+        member s.IsPassive = s > 0y
+        member s.Color = abs s
 
     let score (state:State) : State =
         let width = state.Blocks.Length1
         let height = state.Blocks.Length2
-        let result = Array2D.init width height (fun _ _ -> false, None)
+        let result = Array2D.init width height (fun _ _ -> empty)
         let mutable moveUp = 0
         for y = height - 1 downto 0 do
             let fullRow = 
                 seq { for x = width - 1 downto 0 do
-                        let v, c = state.Blocks.[x,y]
-                        yield (not v) && Option.isSome c } |> Seq.forall id
+                        yield state.Blocks.[x,y].IsPassive } |> Seq.forall id
             if fullRow then moveUp <- moveUp + 1
             if not fullRow then
                 let y' = y + moveUp
                 if y' >= 0 then
                     for x = width - 1 downto 0 do
                         Array2D.set result x y' (state.Blocks.[x, y]) 
-        { state with Blocks = result; Points = state.Points + moveUp }
+        let points = Seq.init (moveUp+1) id |> Seq.sum
+        { state with Blocks = result; Points = state.Points + points }
 
     let canApplyKeyboardTransition (keyPressed:KeyPressed) (state:State) =
         let width = state.Blocks.Length1
@@ -115,13 +115,13 @@ module Game =
         else
             let isValidMove x y = 
                 match keyPressed with
-                | IsLeftPressed -> x > 0 && (fst state.Blocks.[x-1,y] || Option.isNone (snd state.Blocks.[x-1,y]))
-                | IsRightPressed -> x < width - 1 && (fst state.Blocks.[x+1,y] || Option.isNone (snd state.Blocks.[x+1,y]))
-                | IsDownPressed -> y < height - 1 && (fst state.Blocks.[x,y+1] || Option.isNone (snd state.Blocks.[x,y+1]))
+                | IsLeftPressed -> x > 0 && (state.Blocks.[x-1,y].IsActive || state.Blocks.[x-1,y].IsNone)
+                | IsRightPressed -> x < width - 1 && (state.Blocks.[x+1,y].IsActive || state.Blocks.[x+1,y].IsNone)
+                | IsDownPressed -> y < height - 1 && (state.Blocks.[x,y+1].IsActive || state.Blocks.[x,y+1].IsNone)
                 | _ -> true
             state.Blocks 
             |> Array2D.toSeq
-            |> Seq.filter (fun (_,_,(v,_))->v)
+            |> Seq.filter (fun (_,_,v)->v.IsActive)
             |> Seq.forall (fun (x,y,_) -> isValidMove x y)
 
 
@@ -131,7 +131,7 @@ module Game =
         let max a b = (match a with None -> b | Some a -> max a b) |> Some
         state.Blocks 
         |> Array2D.toSeq
-        |> Seq.filter (fun (_,_, (v,_)) -> v)
+        |> Seq.filter (fun (_,_, v) -> v.IsActive)
         |> Seq.fold (fun (minX, maxX, minY, maxY) (x, y, _) -> (min minX x), (max maxX x), (min minY y), (max maxY y)) (None, None, None, None)
         |> function 
         | Some minX, Some maxX, Some minY, Some maxY -> ((minX, maxX), (minY, maxY)) |> Some
@@ -149,7 +149,7 @@ module Game =
 
         state.Blocks 
         |> Array2D.toSeq
-        |> Seq.exists (fun (x,y, (v,c)) -> x >= minX' && x <= maxX' && y >= minY' && y <= maxY' && (not v && Option.isSome c))
+        |> Seq.exists (fun (x,y, v) -> x >= minX' && x <= maxX' && y >= minY' && y <= maxY' && v.IsPassive)
         |> function
         | false when minX > 0 && minY > 0 && maxX < width && maxY < height -> Some (centralX, centralY, distance)
         | _  -> None
@@ -186,19 +186,19 @@ module Game =
                                      | IsDownPressed -> y - 1
                                      | _ -> y
                                      |> max 0
-                            let ((v,c)) = state.Blocks.[x',y']
+                            let v = state.Blocks.[x',y']
 
-                            if v then 
+                            if v.IsActive then 
                                 match keyPressed with
                                 | IsLeftPressed when x = width - 1 -> empty
                                 | IsRightPressed when x = 0 -> empty
                                 | IsDownPressed when y = 0 -> empty
-                                | _ -> (v,c) 
+                                | _ -> v
                                 
                             else 
-                                let ( (v,c)) = state.Blocks.[x,y]
-                                if v then empty
-                                else (v,c))
+                                let v = state.Blocks.[x,y]
+                                if v.IsActive then empty
+                                else v)
             let state = { state with Blocks = blocks }
             if keyPressed.Up then rotate state else state
         else state
@@ -210,63 +210,71 @@ module Game =
             if y = height - 1 then 
                 false
             else 
-                let ((v,c)) = state.Blocks.[x,y+1]
-                v || (Option.isNone c && not v)
+                let v = state.Blocks.[x,y+1]
+                v.IsActive || v.IsNone
 
         state.Blocks 
         |> Array2D.toSeq
-        |> Seq.filter (fun (_,_,(v,_))->v)
+        |> Seq.filter (fun (_,_,v)->v.IsActive)
         |> Seq.forall (fun  (x,y,_) -> 
             isValidMove x y)
 
     let move (state:State) =
         if canMove state then
             { state with Blocks = state.Blocks |> Array2D.mapi 
-                                                    (fun x y (v, c) ->
+                                                    (fun x y v ->
                                                         if y = 0 then empty
                                                         else
-                                                            let (v', c') = state.Blocks.[x,y-1]
-                                                            if v' then v', c'
-                                                            elif v then empty
-                                                            else v, c) }
-        else { state with Blocks = state.Blocks |> Array2D.map (fun  (_, c)-> (false, c)) }
+                                                            let v' = state.Blocks.[x,y-1]
+                                                            if v'.IsActive then v'
+                                                            elif v.IsActive then empty
+                                                            else v) }
+        else { state with Blocks = state.Blocks |> Array2D.map abs }
 
     let blocks : string array array = 
-                  [| [| "X"
-                        "X"
-                        "XX"|];
+                  [| [| "L"
+                        "L"
+                        "LL"|];
 
-                     [| "XX"
-                        "X"
-                        "X"|];
-
+                     [| " J"
+                        " J"
+                        "JJ"|];
 
                     [|  " X ";
                         "XXX"|];
 
+                    [|  " SS";
+                        "SS"|];
+
+                    [|  "ZZ ";
+                        " ZZ"|];
+
                     [| "XXXX"|];
 
-                    [|"XX"
-                      "XX"|];
+                    [|"CC"
+                      "CC"|];
                       
-                    [|"  X"
-                      " X" |] |]
+                    [|"X"
+                      "X" |] |]
               
     let getRandomBlock (rnd:Random) =
             let str = blocks.[rnd.Next blocks.Length]
-            let c = rnd.Next 255
-            Array2D.init 3 4 (fun x y-> if str.Length > x && str.[x].Length > y && str.[x].[y] <> ' ' then Some c else None)
+            let c = (int System.SByte.MaxValue) + 1 |> rnd.Next
+            let c = -c |> int8
+
+            Array2D.init 3 4 (fun x y-> if str.Length > x && str.[x].Length > y && str.[x].[y] <> ' ' then c else 0y)
 
 
     let applyTransition (rnd:Random) (state:State) =
         let blocks = state.Blocks
 
-        if blocks |> Array2D.exists (fun ( (x,_))-> x) |> not then
+        if blocks |> Array2D.exists (fun x -> x.IsActive) |> not then
             let nextBlock = getRandomBlock rnd
             let middle = (blocks.Length1) / 2
             let color = rnd.Next 255
 
-            Array2D.iteri (fun x y (v:Color option) -> 
-                if Option.isSome v then Array2D.set blocks (x+middle-1) y (true, v)) nextBlock
+            Array2D.iteri (fun (x, y, (v:int8)) -> 
+                if v.IsActive then 
+                    Array2D.set blocks (x+middle-1) y v) nextBlock
         { state with Blocks = blocks}
 

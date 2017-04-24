@@ -35,9 +35,9 @@ let draw state =
     let rectW = int canvas.width/BoardSize.width
     for i = 0 to state.Blocks.Length1 - 1 do
         for j = 0 to state.Blocks.Length2 - 1 do
-            let (_, color) = state.Blocks.[i,j]
-            if Option.isSome color then
-                ctx.fillStyle <- !^colors.[color.Value % colors.Length]
+            let color = state.Blocks.[i,j] |> abs |> int
+            if color <> 0 then
+                ctx.fillStyle <- !^colors.[color % colors.Length]
             else
                 ctx.fillStyle <- !^"rgb(20,20,20)"            
             ctx.fillRect (float <| i*rectW, float <| j*rectH, float <| rectW - rectW / 10 , float <| rectH - rectH / 10)
