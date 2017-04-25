@@ -54,8 +54,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="Logic.fs" />
-    <None Include="Logic.fsx" />    
+    <None Include="Logic.fsx" />
+    <Compile Include="..\fable\src\Logic.fs">
+      <Link>Logic.fs</Link>
+    </Compile>
     <Compile Include="Component1.fs" />
     <None Include="packages.config" />
   </ItemGroup>

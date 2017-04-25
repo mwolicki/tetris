@@ -8,6 +8,7 @@ using MonoMac.Foundation;
 #elif __IOS__ || __TVOS__
 using Foundation;
 using UIKit;
+using game;
 #endif
 #endregion
 
@@ -20,11 +21,11 @@ namespace iOS
     static class Program
 #endif
     {
-        private static Game1 game;
+        private static GameClass game;
 
         internal static void RunGame ()
         {
-            game = new Game1 ();
+            game = new GameClass();
             game.Run ();
 #if !__IOS__ && !__TVOS__
             game.Dispose ();
